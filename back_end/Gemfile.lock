@@ -266,6 +266,7 @@ PLATFORMS
   x86_64-darwin-23
 
 DEPENDENCIES
+  activerecord
   bootsnap (>= 1.1.0)
   byebug
   capybara (>= 2.15)
