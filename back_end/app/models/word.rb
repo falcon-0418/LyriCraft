@@ -9,4 +9,9 @@ class Word < ApplicationRecord
       end
     end
   end
+
+  def self.search_by_input_word(input_word)
+    rhymes = Analyzer.analyze(input_word)
+    where(rhyme: rhymes).pluck(:base_form).uniq
+  end
 end

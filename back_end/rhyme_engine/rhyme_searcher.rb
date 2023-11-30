@@ -3,7 +3,7 @@
 def search_words_by_rhyme(rhyme)
   query = Word.where(rhyme: rhyme)
   puts "DEBUG: Executing query: #{query.to_sql}"
-  query.pluck(:base_form)
+  query.pluck(:base_form).uniq
 end
 
 def main
