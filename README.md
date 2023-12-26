@@ -94,7 +94,6 @@ https://in-note.com/
 * PostgreSQL
 * Heroku
 * OpenAI API
-* Microsoft Translator Azule API
 
 
 # ■ 機能の実装方針予定
