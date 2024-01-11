@@ -3,6 +3,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import Sidebar from "./sidebar";
 import NoteActions, { handleNoteCreated, handleSelectNote, handleDeleteNote } from './noteAction';
 import { EditorState } from 'draft-js';
+import AutoSaveComponent from './autoSave';
 import Editor from '@draft-js-plugins/editor';
 import InlineToolbarComponent from './inlineToolbar';
 import createInlineToolbarPlugin from '@draft-js-plugins/inline-toolbar';
@@ -102,6 +103,11 @@ const MyEditor: React.FC<MyEditorProps> = () => {
         setNoteId={setNoteId}
         setNoteTitle={setNoteTitle}
         setEditorState={setEditorState}
+      />
+      <AutoSaveComponent
+        editorState={editorState}
+        noteId={noteId}
+        noteTitle={noteTitle}
       />
     </div>
   );
