@@ -9,11 +9,17 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@draft-js-plugins/anchor": "^4.2.1",
+    "@draft-js-plugins/editor": "^4.1.4",
+    "@draft-js-plugins/inline-toolbar": "^4.2.1",
+    "@draft-js-plugins/linkify": "^4.2.2",
+    "draft-js": "^0.11.7",
     "next": "^14.0.4",
     "react": "^18",
     "react-dom": "^18"
   },
   "devDependencies": {
+    "@types/draft-js": "^0.11.17",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
