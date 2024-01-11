@@ -30,4 +30,4 @@
 # Ignore master key for decrypting credentials and more.
 /config/master.key
 
-back_end/mecab-ipadic-neologd
+back_end/mecab-ipadic-neologd/
