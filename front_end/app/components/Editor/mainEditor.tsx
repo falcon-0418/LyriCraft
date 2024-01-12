@@ -1,6 +1,7 @@
 "use client"
 import React, { useMemo, useState, useEffect } from 'react';
 import Sidebar from "./sidebar";
+import Synchronize from './synchronize';
 import NoteActions, { handleNoteCreated, handleSelectNote, handleDeleteNote } from './noteAction';
 import { EditorState } from 'draft-js';
 import AutoSaveComponent from './autoSave';
@@ -82,6 +83,14 @@ const MyEditor: React.FC<MyEditorProps> = () => {
       />
 
       <div className="flex-1">
+        <Synchronize
+          noteId={noteId}
+          noteTitle={noteTitle}
+          setNoteTitle={setNoteTitle}
+          setNotes={setNotes}
+          notes={notes}
+        />
+
         <Editor
           editorState={editorState}
           onChange={onChange}
