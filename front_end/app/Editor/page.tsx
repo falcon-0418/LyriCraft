@@ -1,16 +1,17 @@
 "use client"
 import React, { useMemo, useState, useEffect } from 'react';
-import Sidebar from "./sidebar";
-import Synchronize from './synchronize';
-import NoteActions, { handleNoteCreated, handleSelectNote, handleDeleteNote } from './noteAction';
+import axios from 'axios';
+import Sidebar from "../components/Editor/sidebar";
+import Synchronize from '../components/Editor/synchronize';
+import NoteActions, { handleNoteCreated, handleSelectNote, handleDeleteNote } from '../components/Editor/noteAction';
 import { EditorState } from 'draft-js';
-import AutoSaveComponent from './autoSave';
+import AutoSaveComponent from '../components/Editor/autoSave';
 import Editor from '@draft-js-plugins/editor';
-import InlineToolbarComponent from './inlineToolbar';
+import InlineToolbarComponent from '../components/Editor/inlineToolbar';
 import createInlineToolbarPlugin from '@draft-js-plugins/inline-toolbar';
 import createLinkPlugin from '@draft-js-plugins/anchor';
 import createLinkifyPlugin from '@draft-js-plugins/linkify';
-import blockStyleFn from "./blockStyleClasses";
+import blockStyleFn from "../components/Editor/blockStyleClasses";
 import '@draft-js-plugins/anchor/lib/plugin.css';
 
 export interface Note {
@@ -55,12 +56,8 @@ const MyEditor: React.FC<MyEditorProps> = () => {
   useEffect(() => {
     const fetchNotes = async () => {
       try {
-        const response = await fetch('http://localhost:3003/api/v1/notes');
-        if (!response.ok) {
-          throw new Error('Failed to fetch notes');
-        }
-        const fetchedNotes = await response.json();
-        setNotes(fetchedNotes);
+        const response = await axios.get('http://localhost:3003/api/v1/notes');
+        setNotes(response.data);
       } catch (error) {
         console.error('Error fetching notes:', error);
       }
