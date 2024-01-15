@@ -1,4 +1,5 @@
 import React from 'react';
+import axios from 'axios';
 import { EditorState, convertFromRaw } from 'draft-js';
 
 interface Note {
@@ -18,44 +19,32 @@ interface NoteActionsProps {
 
 // ノート作成関数
 export const handleNoteCreated = async (newNoteId: number, setNotes: React.Dispatch<React.SetStateAction<Note[]>>, notes: Note[]) => {
-  try {
-    const response = await fetch(`http://localhost:3003/api/v1/notes/${newNoteId}`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch the note');
+    try {
+      const response = await axios.get(`http://localhost:3003/api/v1/notes/${newNoteId}`);
+      setNotes([...notes, response.data]);
+    } catch (error) {
+      console.error('Error fetching note:', error);
     }
-    const newNote = await response.json();
-    setNotes([...notes, newNote]);
-  } catch (error) {
-    console.error('Error fetching note:', error);
-  }
-};
+  };
 
 // ノート選択関数
 export const handleSelectNote = async (selectedNoteId: number, setNoteId: React.Dispatch<React.SetStateAction<number | null>>, setNoteTitle: React.Dispatch<React.SetStateAction<string>>, setEditorState: React.Dispatch<React.SetStateAction<EditorState>>) => {
-  setNoteId(selectedNoteId);
-  try {
-    const response = await fetch(`http://localhost:3003/api/v1/notes/${selectedNoteId}`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch the note');
+    setNoteId(selectedNoteId);
+    try {
+      const response = await axios.get(`http://localhost:3003/api/v1/notes/${selectedNoteId}`);
+      const note = response.data;
+      setNoteTitle(note.title);
+      const contentState = convertFromRaw(JSON.parse(note.body));
+      setEditorState(EditorState.createWithContent(contentState));
+    } catch (error) {
+      console.error('Error fetching note:', error);
     }
-    const note = await response.json();
-    setNoteTitle(note.title);
-    const contentState = convertFromRaw(JSON.parse(note.body));
-    setEditorState(EditorState.createWithContent(contentState));
-  } catch (error) {
-    console.error('Error fetching note:', error);
-  }
-};
+  };
 
 // ノート削除関数
 export const handleDeleteNote = async (noteId: number, setNotes: React.Dispatch<React.SetStateAction<Note[]>>, notes: Note[]) => {
   try {
-    const response = await fetch(`http://localhost:3003/api/v1/notes/${noteId}`, {
-      method: 'DELETE'
-    });
-    if (!response.ok) {
-      throw new Error('Failed to delete the note');
-    }
+    await axios.delete(`http://localhost:3003/api/v1/notes/${noteId}`);
     setNotes(notes.filter(note => note.id !== noteId));
   } catch (error) {
     console.error('Error deleting note:', error);
