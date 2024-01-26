@@ -3,4 +3,5 @@ class UserSerializer
 
   attributes :name, :email
 
+  has_many :notes;
 end

@@ -1,5 +1,5 @@
 import React from 'react';
-import axios from 'axios';
+import axiosInstance from './axiosConfig';
 import { ContentState, convertToRaw } from 'draft-js';
 
 interface CreateNoteButtonProps {
@@ -12,15 +12,15 @@ const CreateNoteButton: React.FC<CreateNoteButtonProps> = ({ onNoteCreated }) =>
     const rawJson = convertToRaw(defaultContentState);
 
     try {
-      const response = await axios.post('http://localhost:3003/api/v1/notes', {
+      const response = await axiosInstance.post('/user/notes', {
         note: {
           title: "Default Title",
           body: JSON.stringify(rawJson)
         }
       });
 
-      const noteId = parseInt(response.data.id, 10); // string から number に変換
-      if (!isNaN(noteId)) {
+      const noteId = response.data && response.data.data ? parseInt(response.data.data.id, 10) : null;
+      if (noteId) {
         onNoteCreated(noteId);
       } else {
         onNoteCreated(null);

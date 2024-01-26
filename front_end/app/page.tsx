@@ -8,7 +8,7 @@ export default function Home() {
         <div className="flex flex-col h-screen justify-center items-center">
           <div className="text-center">
             <h2 className="text-6xl font-bold mb-8">LyriCraft</h2>
-              <Link href="Editor/">
+              <Link href="guest/Editor/">
                 始める
               </Link>
           </div>

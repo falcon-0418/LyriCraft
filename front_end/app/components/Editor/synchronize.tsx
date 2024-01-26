@@ -1,6 +1,6 @@
 import React from 'react';
-import axios from 'axios';
-import { Note } from '../../Editor/page';
+import axiosInstance from './axiosConfig';
+import { Note } from '../../editor/page';
 
 interface SynchronizeProps {
   noteId: number | null;
@@ -18,7 +18,7 @@ const Synchronize: React.FC<SynchronizeProps> = ({ noteId, noteTitle, setNoteTit
     setNotes(updatedNotes);
 
     try {
-      const response = await axios.put(`http://localhost:3003/api/v1/notes/${noteId}`, {
+      const response = await axiosInstance.put(`/user/notes/${noteId}`, {
         title: title,
       });
       console.log('Note title updated successfully:', response.data);
