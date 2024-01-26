@@ -1,3 +1,14 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+    .public-DraftEditor-content {
+      @apply min-h-[500px];
+
+    }
+  }
+
+  .bpsgbes {
+    @apply bg-white  border  shadow-lg;
+  }

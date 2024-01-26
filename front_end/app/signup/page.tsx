@@ -37,18 +37,27 @@ const SignUpPage = () => {
         }
       });
 
+      console.log(response.headers);
+
+      const accessToken = response.headers['accesstoken'];
+      if (accessToken) {
+        sessionStorage.setItem('accessToken', accessToken);
+      } else {
+        console.log('アクセストークンがレスポンスに含まれていません。');
+      }
+
       const userData = response.data.data;
       console.log('ユーザー名:', userData.attributes.name);
       console.log('ユーザーのEメール:', userData.attributes.email);
+      console.log(accessToken)
 
       alert('登録しました。');
       // 登録後に別のページに遷移
-      router.push('/Editor');
+      router.push('/editor');
     } catch (error) {
       console.error('アカウント作成エラー:', error);
     }
   };
-
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">

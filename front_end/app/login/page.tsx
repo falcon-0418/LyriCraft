@@ -22,8 +22,14 @@ const LoginPage = () => {
 
       if (response.status === 200) {
         console.log('ログイン成功:', response.data);
+
+        const accessToken = response.headers['accesstoken'];
+      if (accessToken) {
+        sessionStorage.setItem('accessToken', accessToken);
+      }
+
         alert('ログインしました。');
-        router.push('/Editor');
+        router.push('/editor');
       }
       } catch (error) {
       if (axios.isAxiosError(error) && error.response) {

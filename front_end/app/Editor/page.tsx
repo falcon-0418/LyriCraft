@@ -1,6 +1,6 @@
 "use client"
 import React, { useMemo, useState, useEffect } from 'react';
-import axios from 'axios';
+import axiosInstance from '../components/Editor/axiosConfig';
 import Sidebar from "../components/Editor/sidebar";
 import Synchronize from '../components/Editor/synchronize';
 import NoteActions, { handleNoteCreated, handleSelectNote, handleDeleteNote } from '../components/Editor/noteAction';
@@ -56,8 +56,13 @@ const MyEditor: React.FC<MyEditorProps> = () => {
   useEffect(() => {
     const fetchNotes = async () => {
       try {
-        const response = await axios.get('http://localhost:3003/api/v1/notes');
-        setNotes(response.data);
+        const response = await axiosInstance.get('/user/notes');
+        const fetchedNotes = response.data.data.map((noteItem: any) => ({
+          id: parseInt(noteItem.id, 10),
+          title: noteItem.attributes.title,
+          body: noteItem.attributes.body,
+        }));
+        setNotes(fetchedNotes);
       } catch (error) {
         console.error('Error fetching notes:', error);
       }
