@@ -1,27 +1,33 @@
 import React from 'react';
 import axiosInstance from './axiosConfig';
 import { ContentState, convertToRaw } from 'draft-js';
+import { NoteData } from '@/types/types';
 
 interface CreateNoteButtonProps {
-  onNoteCreated: (noteId: number | null) => void;
+  onNoteCreated: (newNote: NoteData | null) => void;
 }
 
 const CreateNoteButton: React.FC<CreateNoteButtonProps> = ({ onNoteCreated }) => {
   const createNote = async () => {
-    const defaultContentState = ContentState.createFromText("Default Content");
-    const rawJson = convertToRaw(defaultContentState);
+    const emptyContentState = ContentState.createFromText("");
+    const rawJson = convertToRaw(emptyContentState);
 
     try {
       const response = await axiosInstance.post('/user/notes', {
         note: {
-          title: "Default Title",
+          title: "",
           body: JSON.stringify(rawJson)
         }
       });
 
-      const noteId = response.data && response.data.data ? parseInt(response.data.data.id, 10) : null;
-      if (noteId) {
-        onNoteCreated(noteId);
+      if (response.data && response.data.data) {
+        const newNote = {
+          id: parseInt(response.data.data.id, 10),
+          title: response.data.data.attributes.title,
+          body: response.data.data.attributes.body,
+          createdAt: response.data.data.attributes.createdAt
+        };
+        onNoteCreated(newNote);
       } else {
         onNoteCreated(null);
       }
@@ -33,7 +39,7 @@ const CreateNoteButton: React.FC<CreateNoteButtonProps> = ({ onNoteCreated }) =>
 
   return (
     <button
-      className="text-xl rounded-full bg-indigo-500 text-white px-5 py-1.5 mr-5 my-7"
+      className="text-xl rounded-full bg-indigo-500 hover:bg-indigo-400 text-white px-2 py-0.25 mr-1 mt-14"
       onClick={createNote}>
         +
     </button>

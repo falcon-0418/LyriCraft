@@ -1,16 +1,11 @@
 import React from 'react';
 import axiosInstance from './axiosConfig';
 import { EditorState, convertFromRaw } from 'draft-js';
-
-interface Note {
-  id: number;
-  title: string;
-  body: Text;
-}
+import { NoteData } from '@/types/types';
 
 interface NoteActionsProps {
-  notes: Note[];
-  setNotes: React.Dispatch<React.SetStateAction<Note[]>>;
+  notes: NoteData[];
+  setNotes: React.Dispatch<React.SetStateAction<NoteData[]>>;
   noteId: number | null;
   setNoteId: React.Dispatch<React.SetStateAction<number | null>>;
   setNoteTitle: React.Dispatch<React.SetStateAction<string>>;
@@ -18,11 +13,17 @@ interface NoteActionsProps {
 }
 
 // ノート作成関数
-export const handleNoteCreated = async (newNoteId: number, setNotes: React.Dispatch<React.SetStateAction<Note[]>>, notes: Note[]) => {
+export const handleNoteCreated = async (newNoteId: number, setNotes: React.Dispatch<React.SetStateAction<NoteData[]>>, notes: NoteData[]) => {
   try {
     const response = await axiosInstance.get(`/user/notes/${newNoteId}`);
-    const newNote = response.data.data.attributes; // この行を修正
-    setNotes([...notes, { id: parseInt(response.data.data.id, 10), ...newNote }]);
+    const newNote: NoteData = {
+      id: parseInt(response.data.data.id, 10),
+      title: response.data.data.attributes.title,
+      body: response.data.data.attributes.body,
+      createdAt: response.data.data.attributes.createdAt // 'createdAt' プロパティを追加
+    };
+    console.log('setNotes called from handleNoteCreated');
+    setNotes([newNote, ...notes]);
   } catch (error) {
     console.error('Error fetching note:', error);
   }
@@ -45,9 +46,10 @@ export const handleSelectNote = async (selectedNoteId: number, setNoteId: React.
   };
 
 // ノート削除関数
-export const handleDeleteNote = async (noteId: number, setNotes: React.Dispatch<React.SetStateAction<Note[]>>, notes: Note[]) => {
+export const handleDeleteNote = async (noteId: number, setNotes: React.Dispatch<React.SetStateAction<NoteData[]>>, notes: NoteData[]) => {
   try {
     await axiosInstance.delete(`/user/notes/${noteId}`);
+    console.log('setNotes called from handleDeleteNote');
     setNotes(notes.filter(note => note.id !== noteId));
   } catch (error) {
     console.error('Error deleting note:', error);

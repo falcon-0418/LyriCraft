@@ -4,7 +4,7 @@
 
 @layer components {
     .public-DraftEditor-content {
-      @apply min-h-[500px];
+      @apply min-h-[100vh];
 
     }
   }

@@ -2,20 +2,23 @@ import React, { useState, useEffect } from 'react';
 import UserProfile from './userProfile';
 import CreateNoteButton from './createNoteButton';
 import axiosInstance from './axiosConfig';
+import { NoteData } from '@/types/types';
+import { FaRegTrashAlt } from "react-icons/fa";
 
-interface Note {
-  id: number;
-  title: string;
-}
+
 
 interface SidebarProps {
-  notes: Note[];
-  onNoteCreated: (noteId: number | null) => void;
+  notes: NoteData[];
+  onNoteCreated: (newNote: NoteData | null) => void;
   onSelectNote: (noteId: number) => void;
   onDeleteNote: (noteId: number) => void;
+  sidebarWidth: number;
+  setSidebarWidth: React.Dispatch<React.SetStateAction<number>>;
+  isSidebarOpen: boolean;
+  style?: React.CSSProperties;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ notes, onNoteCreated, onSelectNote, onDeleteNote }) => {
+const Sidebar: React.FC<SidebarProps> = ({ notes, onNoteCreated, onSelectNote, onDeleteNote, sidebarWidth, setSidebarWidth, isSidebarOpen }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
@@ -39,27 +42,77 @@ const Sidebar: React.FC<SidebarProps> = ({ notes, onNoteCreated, onSelectNote, o
     setIsModalOpen(!isModalOpen);
   };
 
+  const handleDrag = (e: MouseEvent) => {
+    const newWidth = Math.min(Math.max(e.clientX, 250), 400);
+    setSidebarWidth(newWidth);
+    localStorage.setItem('sidebarWidth', newWidth.toString());
+  };
+
+  const handleMouseUp = () => {
+    window.removeEventListener('mousemove', handleDrag as any);
+    window.removeEventListener('mouseup', handleMouseUp);
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    window.addEventListener('mousemove', handleDrag as any);
+    window.addEventListener('mouseup', handleMouseUp);
+  };
+
   return (
-    <div className="h-full w-64 bg-gray-100 border-r border-gray-300">
-      <div className="mb-4 p-4">
-        <h3 className="text-lg font-semibold cursor-pointer" onClick={toggleModal}>{userName}</h3>
-      </div>
-      <div className="p-4">
-        <h2 className="text-lg font-semibold">ノート</h2>
-        <CreateNoteButton onNoteCreated={onNoteCreated} />
-        <ul className="mt-4">
-          {Array.isArray(notes) && notes.map(note => (
-            <li key={note.id} className="mb-2 p-2 bg-white rounded flex justify-between items-center">
-              <span className="text-sm cursor-pointer" onClick={() => onSelectNote(note.id)}>
-                {note.title}
-              </span>
-              <button className="text-red-500 text-xs" onClick={() => onDeleteNote(note.id)}>
-                削除
-              </button>
-            </li>
-          ))}
-        </ul>
-      </div>
+    <div className="sidebar-container" style={{
+      width: isSidebarOpen ? `${sidebarWidth}px` : "0",
+      position: 'relative',
+      transition: 'width 0.3s ease'
+    }}>
+      <div className="sidebar-content" style={{
+        opacity: isSidebarOpen ? 1 : 0,
+        transform: isSidebarOpen ? 'translateX(0)' : `translateX(-100%)`,
+        transition: 'opacity 0.3s ease, transform 0.3s ease',
+        pointerEvents: isSidebarOpen ? 'auto' : 'none'
+      }}>
+        <div className="mb-4 p-1">
+          <h3 className="py-2 px-6 text-lg text-gray-500 bg-white hover:bg-gray-100 border-r font-semibold cursor-pointer"
+              onClick={toggleModal}>{userName}
+          </h3>
+        </div>
+          <div className="p-1">
+            <div className="p-1 flex justify-between items-center">
+              <h2 className="mt-16 text-lg text-gray-500 font-semibold">My Notes</h2>
+              <CreateNoteButton onNoteCreated={onNoteCreated} />
+            </div>
+            <ul className="overflow-auto mb-24" style={{ height: 'calc(100vh - 200px)' }}>
+              {notes.map(note => (
+                <li
+                  key={note.id}
+                  className="hover:bg-gray-100 text-gray-500 mb-1 p-2 bg-white rounded flex justify-between items-center"
+                  onClick={() => onSelectNote(note.id)}
+                >
+                  <span className="text-sm cursor-pointer">
+                    {note.title || "New Title"}
+                  </span>
+                  <button
+                    className="text-gray-500 text-xs hover:bg-gray-300 p-2"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (window.confirm('本当に削除しますか？')) {
+                        onDeleteNote(note.id);
+                      }
+                    }}
+                  >
+                    <FaRegTrashAlt />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+
+      <div
+        className="w-2 bg-gray-400 cursor-col-resize absolute right-0 top-0 bottom-0"
+        onMouseDown={handleMouseDown}
+      />
 
       <div
         className={`absolute inset-0
