@@ -1,17 +1,21 @@
 "use client"
 import React, { useMemo, useState, useEffect, useRef } from 'react';
+import { replaceText } from '../components/Editor/textUtils';
 import axiosInstance from '../components/Editor/axiosConfig';
 import Sidebar from "../components/Editor/sidebar";
 import { Title } from '../components/Editor/title';
 import { NoteData } from '@/types/types';
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import NoteActions,{ handleNoteCreated, handleSelectNote, handleDeleteNote } from '../components/Editor/noteAction';
-import { EditorState } from 'draft-js';
+import { EditorState, convertFromRaw } from 'draft-js';
 import { titleKeyActions } from '../components/Editor/titleKeyAction';
 import { editorKeyActions } from '../components/Editor/editorKeyAction';
 import AutoSaveComponent from '../components/Editor/autoSave';
 import Editor from '@draft-js-plugins/editor';
 import InlineToolbarComponent from '../components/Editor/inlineToolbar';
+import RhymeSearchModal from '../components/Editor/searchResultModal';
+import useSelectedText from '../hooks/useSelectedText'
+import useSelectionPosition from '../hooks/useSelectionPosition';
 import createInlineToolbarPlugin from '@draft-js-plugins/inline-toolbar';
 import createLinkPlugin from '@draft-js-plugins/anchor';
 import createLinkifyPlugin from '@draft-js-plugins/linkify';
@@ -37,9 +41,18 @@ const MyEditor: React.FC<MyEditorProps> = () => {
   const [noteId, setNoteId] = useState<number | null>(null);
   const [noteTitle, setNoteTitle] = useState<string>("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const selectedText = useSelectedText(editorState);
+  const selectionPosition = useSelectionPosition();
 
   const editorRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    console.log("Current selection position:", selectionPosition);
+  }, [selectionPosition]);
+
 
   const onNewNoteCreated = async (newNote: NoteData | null) => {
     if (newNote !== null) {
@@ -79,7 +92,6 @@ const MyEditor: React.FC<MyEditorProps> = () => {
           createdAt: noteItem.attributes.created_at,
         }));
 
-        // 日付の比較を行うために Date オブジェクトに変換
         fetchedNotes.sort((a: NoteData, b: NoteData) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
         setNotes(fetchedNotes);
@@ -87,6 +99,7 @@ const MyEditor: React.FC<MyEditorProps> = () => {
           const firstNote = fetchedNotes[0];
           setNoteId(firstNote.id);
           setNoteTitle(firstNote.title);
+          setEditorState(EditorState.createWithContent(convertFromRaw(JSON.parse(firstNote.body))));
         }
       } catch (error) {
         console.error('Error fetching notes:', error);
@@ -105,6 +118,7 @@ const MyEditor: React.FC<MyEditorProps> = () => {
       }
     }
   });
+
   const handleKeyDown = titleActions.handleKeyDown;
 
   const editorActions = editorKeyActions({ editorState, setEditorState, textareaRef });
@@ -119,6 +133,14 @@ const MyEditor: React.FC<MyEditorProps> = () => {
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
     setSidebarWidth(isSidebarOpen ? 0 : 250);
+  };
+
+  
+
+  const handleWordSelect = (word: string) => {
+    const newEditorState = replaceText(editorState, word);
+    setEditorState(newEditorState);
+    setIsModalOpen(false); // モーダルを閉じる
   };
 
 
@@ -191,9 +213,19 @@ const MyEditor: React.FC<MyEditorProps> = () => {
               setEditorState={setEditorState}
               InlineToolbar={InlineToolbar}
               LinkButton={LinkButton}
+              setSearchResults={setSearchResults}
+              setIsModalOpen={setIsModalOpen}
+              selectedText={selectedText}
             />
           </div>
         </div>
+        <RhymeSearchModal
+          searchResults={searchResults}
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          position={selectionPosition}
+          onWordSelect={handleWordSelect}
+        />
       <NoteActions
         notes={notes}
         setNotes={setNotes}

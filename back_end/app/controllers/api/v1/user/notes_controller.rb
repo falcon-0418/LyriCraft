@@ -41,6 +41,11 @@ class Api::V1::User::NotesController < Api::V1::BaseController
     render json: json_string
   end
 
+  def exists
+    note_exists = current_user.notes.exists?
+    render json: { exists: note_exists }
+  end
+
   private
 
   def set_note

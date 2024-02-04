@@ -1,6 +1,7 @@
 "use client"
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { EditorState, convertFromRaw, convertToRaw } from 'draft-js';
+import { replaceText } from '../../components/Editor/textUtils';
 import Editor from '@draft-js-plugins/editor';
 import createInlineToolbarPlugin from '@draft-js-plugins/inline-toolbar';
 import createLinkPlugin from '@draft-js-plugins/anchor';
@@ -10,6 +11,9 @@ import 'draft-js/dist/Draft.css';
 import '@draft-js-plugins/anchor/lib/plugin.css';
 
 import InlineToolbarComponent from '../../components/Editor/inlineToolbar';
+import useSelectedText from '../../hooks/useSelectedText'
+import useSelectionPosition from '../../hooks/useSelectionPosition';
+import RhymeSearchModal from '../../components/Editor/searchResultModal';
 import blockStyleFn from "../../components/Editor/blockStyleClasses";
 import WritingButton from './writing';
 import WritingAiButton from './writingAi';
@@ -26,9 +30,14 @@ const MyEditor: React.FC<MyEditorProps> = () => {
   });
   const [showEditor, setShowEditor] = useState(false);
   const [noteTitle, setNoteTitle] = useState(sessionStorage.getItem('guestTitle') || '');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   const editorRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const selectedText = useSelectedText(editorState);
+  const selectionPosition = useSelectionPosition();
+
 
   const [plugins, InlineToolbar, LinkButton] = useMemo(() => {
     const linkPlugin = createLinkPlugin({ placeholder: 'https://...' });
@@ -67,6 +76,12 @@ const MyEditor: React.FC<MyEditorProps> = () => {
     }
   });
   const handleKeyDown = titleActions.handleKeyDown;
+
+  const handleWordSelect = (word: string) => {
+    const newEditorState = replaceText(editorState, word);
+    setEditorState(newEditorState);
+    setIsModalOpen(false); // モーダルを閉じる
+  };
 
   return (
     <div className="flex justify-center items-start min-h-screen">
@@ -113,8 +128,18 @@ const MyEditor: React.FC<MyEditorProps> = () => {
                   setEditorState={setEditorState}
                   InlineToolbar={InlineToolbar}
                   LinkButton={LinkButton}
+                  setSearchResults={setSearchResults}
+                  setIsModalOpen={setIsModalOpen}
+                  selectedText={selectedText}
                 />
               </div>
+              <RhymeSearchModal
+                searchResults={searchResults}
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                position={selectionPosition}
+                onWordSelect={handleWordSelect}
+              />
             </div>
           )}
         </div>
