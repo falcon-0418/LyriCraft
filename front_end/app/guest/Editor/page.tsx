@@ -1,137 +1,103 @@
 "use client"
 import React, { useEffect, useMemo, useState, useRef } from 'react';
-import  { EditorState, convertFromRaw, convertToRaw, getDefaultKeyBinding } from 'draft-js';
+import { EditorState, convertFromRaw, convertToRaw } from 'draft-js';
+import { replaceText } from '../../components/Editor/textUtils';
 import Editor from '@draft-js-plugins/editor';
-import 'draft-js/dist/Draft.css';
-import InlineToolbarComponent from '../../components/Editor/inlineToolbar';
 import createInlineToolbarPlugin from '@draft-js-plugins/inline-toolbar';
-import blockStyleFn from "../../components/Editor/blockStyleClasses";
 import createLinkPlugin from '@draft-js-plugins/anchor';
-import '@draft-js-plugins/anchor/lib/plugin.css';
 import createLinkifyPlugin from '@draft-js-plugins/linkify';
+
+import 'draft-js/dist/Draft.css';
+import '@draft-js-plugins/anchor/lib/plugin.css';
+
+import InlineToolbarComponent from '../../components/Editor/inlineToolbar';
+import useSelectedText from '../../hooks/useSelectedText'
+import useSelectionPosition from '../../hooks/useSelectionPosition';
+import RhymeSearchModal from '../../components/Editor/searchResultModal';
+import blockStyleFn from "../../components/Editor/blockStyleClasses";
 import WritingButton from './writing';
 import WritingAiButton from './writingAi';
+import { Title } from '../../components/Editor/title';
+import  { editorKeyActions }  from '../../components/Editor/editorKeyAction';
+import { titleKeyActions } from '../../components/Editor/titleKeyAction';
 
 interface MyEditorProps {}
 
 const MyEditor: React.FC<MyEditorProps> = () => {
+  const [editorState, setEditorState] = useState(() => {
+    const content = sessionStorage.getItem('guestContent');
+    return content ? EditorState.createWithContent(convertFromRaw(JSON.parse(content))) : EditorState.createEmpty();
+  });
+  const [showEditor, setShowEditor] = useState(false);
+  const [noteTitle, setNoteTitle] = useState(sessionStorage.getItem('guestTitle') || '');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+
+  const editorRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const selectedText = useSelectedText(editorState);
+  const selectionPosition = useSelectionPosition();
+
+
   const [plugins, InlineToolbar, LinkButton] = useMemo(() => {
     const linkPlugin = createLinkPlugin({ placeholder: 'https://...' });
     const linkifyPlugin = createLinkifyPlugin();
     const inlineToolbarPlugin = createInlineToolbarPlugin();
     return [
-    [inlineToolbarPlugin, linkPlugin, linkifyPlugin],
-    inlineToolbarPlugin.InlineToolbar,
-    linkPlugin.LinkButton,
-   ];
+      [inlineToolbarPlugin, linkPlugin, linkifyPlugin],
+      inlineToolbarPlugin.InlineToolbar,
+      linkPlugin.LinkButton,
+    ];
   }, []);
 
-  const [showEditor, setShowEditor] = useState(false);
-
-  useEffect(() => {
-    textareaRef.current?.focus();
-  }, []);
-
-  const [noteTitle, setNoteTitle] = useState(sessionStorage.getItem('guestTitle') || '');
-
-// エディタの状態
-  const [editorState, setEditorState] = useState(() => {
-    const content = sessionStorage.getItem('guestContent');
-    return content ? EditorState.createWithContent(convertFromRaw(JSON.parse(content))) : EditorState.createEmpty();
-  });
-
-  // タイトルの変更をセッションストレージに保存
   useEffect(() => {
     sessionStorage.setItem('guestTitle', noteTitle);
   }, [noteTitle]);
 
-  // エディタの内容が変更されたときのハンドラ
   const onChange = (newEditorState: EditorState) => {
     setEditorState(newEditorState);
     const content = JSON.stringify(convertToRaw(newEditorState.getCurrentContent()));
     sessionStorage.setItem('guestContent', content);
   };
 
-  // タイトルが変更されたときのハンドラ
   const handleTitleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setNoteTitle(e.target.value);
   };
 
+  const editorActions = editorKeyActions({ editorState, setEditorState, textareaRef });
+  const handleKeyCommand = editorActions.handleKeyCommand;
+  const keyBindingFn = editorActions.keyBindingFn;
 
-  const editorRef = useRef<HTMLDivElement>(null);
-
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (event.key === 'Enter') {
-      const keyboardEvent = event.nativeEvent as KeyboardEvent;
-
-      if (event.shiftKey) {
-        return;
-      }
-
-      if (!keyboardEvent.isComposing) {
-        event.preventDefault();
-
-        const newState = EditorState.moveFocusToEnd(editorState);
-        setEditorState(newState);
-      }
+  const titleActions = titleKeyActions({
+    textareaRef,
+    onEnter: () => {
+      const newState = EditorState.moveFocusToEnd(editorState);
+      setEditorState(newState);
     }
-  };
+  });
+  const handleKeyDown = titleActions.handleKeyDown;
 
-  const adjustTextareaHeight = () => {
-    const target = textareaRef.current;
-    if (target) {
-      target.style.height = 'auto';
-      const newHeight = Math.min(target.scrollHeight, window.innerHeight);
-      target.style.height = `${newHeight}px`;
-    }
-  };
-
-  useEffect(() => {
-    adjustTextareaHeight();
-  }, []);
-
-  const handleTextareaInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    adjustTextareaHeight();
-  };
-
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  const isEditorEmpty = (editorState: EditorState) => {
-    return !editorState.getCurrentContent().hasText();
-  };
-
-  const handleKeyCommand = (command: string, editorState: EditorState) => {
-    if (command === 'backspace' && isEditorEmpty(editorState)) {
-      if (textareaRef.current) {
-        const length = textareaRef.current.value.length;
-        textareaRef.current.focus();
-        textareaRef.current.setSelectionRange(length, length);
-      }
-      return 'handled';
-    }
-    return 'not-handled';
-  };
-
-  const keyBindingFn = (e: React.KeyboardEvent<{}>) => {
-    if (e.key === 'backspace') {
-      return 'backspace';
-    }
-    return getDefaultKeyBinding(e);
+  const handleWordSelect = (word: string) => {
+    const newEditorState = replaceText(editorState, word);
+    setEditorState(newEditorState);
+    setIsModalOpen(false); // モーダルを閉じる
   };
 
   return (
     <div className="flex justify-center items-start min-h-screen">
       <div className="w-2/5">
-        <textarea
-          className="mt-36 text-4xl border-none font-bold focus:ring-0 rounded resize-none mb-4 "
+        <Title
+          ref={textareaRef}
+          className="mt-36 text-4xl border-none font-bold focus:ring-0 rounded resize-none mb-4"
+          style={{ overflow: 'hidden', paddingLeft: '1px'}}
           placeholder="NewTitle"
           value={noteTitle}
           onChange={handleTitleChange}
-          onInput={handleTextareaInput}
           onKeyDown={handleKeyDown}
-          ref={textareaRef}
-          style={{ overflow: 'hidden', paddingLeft: '1px'}}
-          rows={1}
+          noteId={null}
+          setNoteTitle={() => {}}
+          setNotes={() => {}}
+          notes={[]}
         />
          {!showEditor && (
           <div className="flex justify-start mt-4">
@@ -162,8 +128,18 @@ const MyEditor: React.FC<MyEditorProps> = () => {
                   setEditorState={setEditorState}
                   InlineToolbar={InlineToolbar}
                   LinkButton={LinkButton}
+                  setSearchResults={setSearchResults}
+                  setIsModalOpen={setIsModalOpen}
+                  selectedText={selectedText}
                 />
               </div>
+              <RhymeSearchModal
+                searchResults={searchResults}
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                position={selectionPosition}
+                onWordSelect={handleWordSelect}
+              />
             </div>
           )}
         </div>

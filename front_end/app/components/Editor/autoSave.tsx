@@ -1,27 +1,23 @@
 import { useEffect, useCallback } from 'react';
 import { EditorState, convertToRaw } from 'draft-js';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import axiosInstance from './axiosConfig';
 
 interface AutoSaveComponentProps {
-    editorState: EditorState;
-    noteId: number | null;
-    noteTitle: string;
+  editorState: EditorState;
+  noteId: number | null;
+  noteTitle: string;
 }
 
 const AutoSaveComponent = ({ editorState, noteId, noteTitle }: AutoSaveComponentProps) => {
-    const saveContent = useCallback(async (editorState: EditorState, noteTitle: string) => {
-      console.log("saveContent called with noteId:", noteId);
-      if (!noteId) return;
+  const saveContent = useCallback(async () => {
+    if (!noteId) return;
       const contentState = editorState.getCurrentContent();
       const rawContent = JSON.stringify(convertToRaw(contentState));
-      console.log("Saving content:", rawContent);
-
-      const saveNoteUrl = `/user/notes/${noteId}`;
 
       try {
-        const response = await axiosInstance.put(saveNoteUrl, {
+        const response = await axiosInstance.put(`/user/notes/${noteId}`, {
           title: noteTitle,
           body: rawContent,
         });
@@ -29,37 +25,26 @@ const AutoSaveComponent = ({ editorState, noteId, noteTitle }: AutoSaveComponent
       } catch (error) {
         console.error('Error saving note:', error);
       }
-    }, [noteId]);
+  }, [editorState, noteId, noteTitle]);
 
+  const autoSaveSubject = new Subject();
 
   useEffect(() => {
-    const saveChanges = () => {
-      saveContent(editorState, noteTitle);
-    };
-
-    const editorSubject = new Subject<EditorState>();
-    const titleSubject = new Subject<string>();
-
-    const editorSubscription = editorSubject.pipe(
+    const autoSaveSubscription = autoSaveSubject.pipe(
       debounceTime(1000),
-      distinctUntilChanged()
-    ).subscribe(saveChanges);
-
-    const titleSubscription = titleSubject.pipe(
-      debounceTime(1000),
-      distinctUntilChanged()
-    ).subscribe(saveChanges);
-
-    editorSubject.next(editorState);
-    titleSubject.next(noteTitle);
+      distinctUntilChanged(),
+    ).subscribe(() => {
+      saveContent();
+    });
 
     return () => {
-      editorSubscription.unsubscribe();
-      titleSubscription.unsubscribe();
-      editorSubject.complete();
-      titleSubject.complete();
+      autoSaveSubscription.unsubscribe();
     };
-  }, [editorState, noteTitle, saveContent]);
+  }, [saveContent]);
+
+  useEffect(() => {
+    autoSaveSubject.next({ editorState, noteTitle });
+  }, [editorState, noteTitle]);
 
   return null;
 };
