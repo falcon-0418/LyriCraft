@@ -11,7 +11,14 @@ const config: Config = {
   ],
   theme: {
     extend: {
-
+      fontSize: {
+        sm: '0.7rem'
+      },
+      colors: {
+        gray: {
+          '500': '#6B7280'
+        }
+      },
     },
   },
   plugins: [forms, typography],

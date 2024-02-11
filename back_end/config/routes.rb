@@ -4,12 +4,12 @@ Rails.application.routes.draw do
       get 'rhyme_search', to: 'rhyme_search#search'
       resource :profile, only: [:show]
       resource :registration, only: %i[create]
-      resource :authentication, only: %i[create destroy]
+      resource :authentication, only: %i[create destroy] do
+        post 'google_create', on: :collection 
+      end
 
       namespace :user do
-        resources :notes, only: %i[index create show update destroy] do
-          get :exists, on: :collection
-        end
+        resources :notes, only: %i[index create show update destroy]
       end
     end
   end

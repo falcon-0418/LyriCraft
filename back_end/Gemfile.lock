@@ -274,6 +274,7 @@ DEPENDENCIES
   chromedriver-helper
   coffee-rails (~> 4.2)
   fast_jsonapi
+  jwt
   listen (~> 3.5)
   natto
   pg (>= 0.18, < 2.0)

@@ -1,8 +1,9 @@
 "use client"
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { FaGoogle } from 'react-icons/fa';
+import GoogleLoginButton from '../login/googleLoginButton';
 import axios from 'axios';
+import SharedLayout from '../layout/sharedLayout';
 
 const SignUpPage = () => {
   const [username, setUsername] = useState('');
@@ -10,6 +11,7 @@ const SignUpPage = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
   // Next.jsのフックを使用
   const router = useRouter();
@@ -60,13 +62,10 @@ const SignUpPage = () => {
   };
 
   return (
+    <SharedLayout>
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      <div className="p-6 bg-white shadow-md rounded">
-        <h2 className="text-2xl font-bold text-center mb-6">アカウント作成</h2>
-        <button className="flex items-center justify-center w-full px-4 py-2 mb-4 text-white bg-red-500 rounded hover:bg-red-600">
-          <FaGoogle className="mr-2" />
-          Googleアカウントでサインアップする
-        </button>
+        <h2 className="text-5xl font-bold text-center mb-6">アカウント作成</h2>
+          {googleClientId && <GoogleLoginButton clientId={googleClientId} />}
         <hr className="my-4" />
         <form onSubmit={handleSignUp} className="space-y-4">
           <div>
@@ -75,7 +74,7 @@ const SignUpPage = () => {
               placeholder="ユーザー名"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
+              className="w-[300px] px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
               required
             />
           </div>
@@ -117,15 +116,22 @@ const SignUpPage = () => {
               className="w-4 h-4 text-blue-600 rounded"
             />
             <label className="ml-2 text-sm">
-              <a href="/terms" className="text-blue-600 hover:underline">プライバシーと利用規約</a>に同意します
+              <a href="/terms" className="text-blue-600 hover:underline">
+                プライバシー
+              </a>
+              と
+              <a href='/terms' className="text-blue-600 hover:underline">
+                利用規約
+              </a>
+              に同意します
             </label>
           </div>
           <button type="submit" className="w-full py-2 px-4 bg-indigo-500 text-white rounded hover:bg-indigo-600">
             アカウント作成
           </button>
         </form>
-      </div>
     </div>
+    </SharedLayout>
   );
 };
 

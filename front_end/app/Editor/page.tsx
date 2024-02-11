@@ -1,5 +1,6 @@
 "use client"
 import React, { useMemo, useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation'
 import { replaceText } from '../components/Editor/textUtils';
 import axiosInstance from '../components/Editor/axiosConfig';
 import Sidebar from "../components/Editor/sidebar";
@@ -45,6 +46,7 @@ const MyEditor: React.FC<MyEditorProps> = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const selectedText = useSelectedText(editorState);
   const selectionPosition = useSelectionPosition();
+  const router = useRouter();
 
   const editorRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -52,7 +54,6 @@ const MyEditor: React.FC<MyEditorProps> = () => {
   useEffect(() => {
     console.log("Current selection position:", selectionPosition);
   }, [selectionPosition]);
-
 
   const onNewNoteCreated = async (newNote: NoteData | null) => {
     if (newNote !== null) {
@@ -79,6 +80,10 @@ const MyEditor: React.FC<MyEditorProps> = () => {
   const onSelectNote = async (selectedNoteId: number) => {
     await handleSelectNote(selectedNoteId, setNoteId, setNoteTitle, setEditorState);
 
+    localStorage.setItem('lastSelectedNoteId', selectedNoteId.toString());
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+    }
   };
 
   useEffect(() => {
@@ -89,17 +94,17 @@ const MyEditor: React.FC<MyEditorProps> = () => {
           id: parseInt(noteItem.id, 10),
           title: noteItem.attributes.title,
           body: noteItem.attributes.body,
-          createdAt: noteItem.attributes.created_at,
         }));
 
-        fetchedNotes.sort((a: NoteData, b: NoteData) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-
         setNotes(fetchedNotes);
+        const lastSelectedNoteId = localStorage.getItem('lastSelectedNoteId');
         if (fetchedNotes.length > 0) {
-          const firstNote = fetchedNotes[0];
-          setNoteId(firstNote.id);
-          setNoteTitle(firstNote.title);
-          setEditorState(EditorState.createWithContent(convertFromRaw(JSON.parse(firstNote.body))));
+          const mostRecentNote = lastSelectedNoteId
+            ? fetchedNotes.find((note: NoteData) => note.id.toString() === lastSelectedNoteId) || fetchedNotes[0]
+            : fetchedNotes[0];
+          setNoteId(mostRecentNote.id);
+          setNoteTitle(mostRecentNote.title);
+          setEditorState(EditorState.createWithContent(convertFromRaw(JSON.parse(mostRecentNote.body))));
         }
       } catch (error) {
         console.error('Error fetching notes:', error);
@@ -135,14 +140,18 @@ const MyEditor: React.FC<MyEditorProps> = () => {
     setSidebarWidth(isSidebarOpen ? 0 : 250);
   };
 
-  
-
   const handleWordSelect = (word: string) => {
     const newEditorState = replaceText(editorState, word);
     setEditorState(newEditorState);
     setIsModalOpen(false); // モーダルを閉じる
   };
 
+  useEffect(() => {
+    const accessToken = sessionStorage.getItem('accessToken');
+    if (!accessToken) {
+      router.push('/login');
+    }
+  }, [router]);
 
   const onChange = (value: EditorState) => {
     setEditorState(value);
@@ -162,6 +171,7 @@ const MyEditor: React.FC<MyEditorProps> = () => {
           setSidebarWidth={setSidebarWidth}
           isSidebarOpen={isSidebarOpen}
           sidebarWidth={sidebarWidth}
+          noteId={noteId}
         />
       </div>
       <button onClick={toggleSidebar} style={{
@@ -192,12 +202,12 @@ const MyEditor: React.FC<MyEditorProps> = () => {
               setNotes={setNotes}
               notes={notes}
               placeholder="NewTitle"
-              className="mt-36 border-none text-4xl font-bold focus:ring-0 p-2 rounded resize-none mb-4"
+              className="mt-36 border-none text-4xl font-bold focus:ring-0 p-2 rounded resize-none mb-4 text-gray-700"
               style={{ overflow: 'hidden', paddingLeft: '1px'}}
               isSynchronized={true}
               onKeyDown={handleKeyDown}
             />
-          <div className="public-DraftEditor-content mb-32 w-full">
+          <div className="public-DraftEditor-content mb-32 w-full text-gray-700">
             <Editor
               editorState={editorState}
               onChange={onChange}
