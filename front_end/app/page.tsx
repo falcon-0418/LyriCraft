@@ -5,7 +5,7 @@ export default function Home() {
   return (
     <SharedLayout>
       <main>
-        <div className="flex flex-col h-screen justify-center items-center">
+        <div className="flex flex-col h-screen justify-center items-center bg-gray-100">
           <div className="text-center">
             <h2 className="text-6xl font-bold mb-8">LyriCraft</h2>
               <Link href="guest/Editor/">

@@ -1,4 +1,5 @@
 import axiosInstance from './axiosConfig';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface UserProfileProps {
@@ -23,7 +24,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ userName, userEmail, setIsMod
     try {
       await axiosInstance.delete('/authentication');
       sessionStorage.removeItem('accessToken');
-      router.push('/login');
+      router.push('/');
     } catch (error) {
       console.error('ログアウトエラー:', error);
     }
@@ -36,9 +37,9 @@ const UserProfile: React.FC<UserProfileProps> = ({ userName, userEmail, setIsMod
         style={{ top: '3rem', left: '0.5rem', width: '20rem' }}
         onClick={handleContentClick}
       >
-        <h4 className="text-xl font-semibold mb-4">プロフィール</h4>
-        <p>名前: {userName}</p>
-        <p>メール: {userEmail}</p>
+        <h4 className="text-xl font-semibold mb-4 text-gray-500">プロフィール</h4>
+        <p className='text-gray-500'>名前: {userName}</p>
+        <p className='text-gray-500'>メール: {userEmail}</p>
         <button
           className="mt-4 text-red-500 hover:text-red-300 py-2 px-4 rounded"
           onClick={handleLogout}
