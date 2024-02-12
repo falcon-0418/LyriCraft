@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { RefObject } from 'react';
 
-const sidebarAnimationDuration = 300;
+const sidebarAnimationDuration = 500;
 
 const useEditorPosition = (editorRef: RefObject<HTMLDivElement>, isSidebarOpen: boolean, sidebarWidth: number) => {
   const [editorRect, setEditorRect] = useState({ left: 0, top: 0, width: 0, height: 0 });

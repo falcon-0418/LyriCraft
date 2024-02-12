@@ -62,12 +62,13 @@ const Sidebar: React.FC<SidebarProps> = ({ notes, noteId, onNoteCreated, onSelec
     <div className="sidebar-container" style={{
       width: isSidebarOpen ? `${sidebarWidth}px` : "0",
       position: 'relative',
-      transition: 'width 0.3s ease'
+      transition: 'width 0.5s ease',
+      overflow: 'hidden'
     }}>
       <div className="sidebar-content" style={{
         opacity: isSidebarOpen ? 1 : 0,
         transform: isSidebarOpen ? 'translateX(0%)' : `translateX(-100%)`,
-        transition: 'opacity 0.3s ease, transform 0.3s ease',
+        transition: 'opacity 0.5s ease, transform 0.5s ease',
         pointerEvents: isSidebarOpen ? 'auto' : 'none'
       }}>
         <div className="mb-4 p-1">
@@ -84,7 +85,7 @@ const Sidebar: React.FC<SidebarProps> = ({ notes, noteId, onNoteCreated, onSelec
               {notes.map(note => (
                 <li
                   key={note.id}
-                  className={ `text-gray-500 mb-1 p-2 bg-white flex justify-between items-center
+                  className={ `text-gray-500 mb-1 p-2 flex justify-between items-center
                     ${note.id === noteId ? 'bg-indigo-100 border-l-4 border-indigo-500' : 'hover:bg-indigo-50'}`}
                   onClick={() => onSelectNote(note.id)}
                 >
@@ -92,7 +93,7 @@ const Sidebar: React.FC<SidebarProps> = ({ notes, noteId, onNoteCreated, onSelec
                     {note.title || "New Title"}
                   </span>
                   <button
-                    className="text-gray-500 text-xs hover:bg-gray-300 p-2"
+                    className="text-gray-500 text-xs hover:bg-indigo-200 rounded p-2"
                     onClick={(e) => {
                       e.stopPropagation();
                       if (window.confirm('本当に削除しますか？')) {

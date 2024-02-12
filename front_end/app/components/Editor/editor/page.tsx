@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import useSelectedText from '../Hooks/useSelectedText'
 import useSelectionPosition from '../Hooks/useSelectionPosition';
 import useEditorPosition from '../Hooks/useEditorPosition';
+import useSidebar from '../Hooks/useSidebar';
 
 import { EditorState, convertFromRaw } from 'draft-js';
 import Editor from '@draft-js-plugins/editor';
@@ -60,10 +61,8 @@ const MyEditor: React.FC<MyEditorProps> = () => {
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const editorRef = useRef<HTMLDivElement>(null);
-  const savedSidebarWidth = localStorage.getItem('sidebarWidth');
-  const initialSidebarWidth = savedSidebarWidth ? parseInt(savedSidebarWidth, 10) : 250;
-  const [sidebarWidth, setSidebarWidth] = useState(initialSidebarWidth);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  const { isSidebarOpen, toggleSidebar, sidebarWidth, setSidebarWidth } = useSidebar();
   const editorPosition = useEditorPosition(editorRef, isSidebarOpen, sidebarWidth);
 
   const editorActions = editorKeyActions({ editorState, setEditorState, textareaRef });
@@ -152,12 +151,6 @@ const MyEditor: React.FC<MyEditorProps> = () => {
   });
   const handleKeyDown = titleActions.handleKeyDown;
 
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-    setSidebarWidth(isSidebarOpen ? 0 : 250);
-  };
-
   const handleWordSelect = (word: string) => {
     const newEditorState = replaceText(editorState, word);
     setEditorState(newEditorState);
@@ -167,8 +160,8 @@ const MyEditor: React.FC<MyEditorProps> = () => {
   return (
     <div className="flex min-h-screen bg-stone-50">
       <div className="fixed top-0 left-0 bottom-0"style={{
-        width: isSidebarOpen ? sidebarWidth : 0,
-        transition: 'width 0.3s ease'
+        width: isSidebarOpen ? `${sidebarWidth}px` : '0',
+        transition: 'width 0.5s ease'
       }}>
         <Sidebar
           notes={notes}
@@ -185,7 +178,7 @@ const MyEditor: React.FC<MyEditorProps> = () => {
         position: 'fixed',
         top: 0,
         left: isSidebarOpen ? sidebarWidth : 0,
-        transition: 'left 0.3s ease'
+        transition: 'left 0.5s ease'
       }}>
         {
           isSidebarOpen
@@ -197,7 +190,7 @@ const MyEditor: React.FC<MyEditorProps> = () => {
           className="flex flex-col items-center justify-start" style={{
             marginLeft: isSidebarOpen ? sidebarWidth : 0,
             width: isSidebarOpen ? `calc(100% - ${sidebarWidth}px)` : '100%',
-            transition: 'margin-left 0.3s ease'
+            transition: 'margin-left 0.5s ease'
           }}
         >
           <div className="w-2/5">

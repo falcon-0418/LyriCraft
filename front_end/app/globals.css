@@ -13,4 +13,6 @@
     @apply bg-white  border  shadow-lg;
   }
 
- 
+  .no-transition {
+    transition: none !important;
+  }
