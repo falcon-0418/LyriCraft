@@ -32,7 +32,7 @@ const LoginPage = () => {
       }
 
         alert('ログインしました。');
-        router.push('/editor');
+        router.push('components/Editor/editor');
       }
       } catch (error) {
       if (axios.isAxiosError(error) && error.response) {

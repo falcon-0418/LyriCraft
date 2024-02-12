@@ -1,5 +1,5 @@
 import React from 'react';
-import axiosInstance from './axiosConfig';
+import axiosInstance from '../editor/axiosConfig';
 
 interface RhymeResult {
   word: string;

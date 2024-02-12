@@ -10,16 +10,16 @@ import createLinkifyPlugin from '@draft-js-plugins/linkify';
 import 'draft-js/dist/Draft.css';
 import '@draft-js-plugins/anchor/lib/plugin.css';
 
-import InlineToolbarComponent from '../../components/Editor/inlineToolbar';
-import useSelectedText from '../../hooks/useSelectedText'
-import useSelectionPosition from '../../hooks/useSelectionPosition';
-import RhymeSearchModal from '../../components/Editor/searchResultModal';
-import blockStyleFn from "../../components/Editor/blockStyleClasses";
+import InlineToolbarComponent from '../../components/Editor/InlineToolbar/inlineToolbar';
+import useSelectedText from '../../components/Editor/Hooks/useSelectedText'
+import useSelectionPosition from '../../components/Editor/Hooks/useSelectionPosition';
+import RhymeSearchModal from '../../components/Editor/Modal/searchResultModal';
+import blockStyleFn from "../../components/Editor/InlineToolbar/blockStyleClasses";
 import WritingButton from './writing';
 import WritingAiButton from './writingAi';
-import { Title } from '../../components/Editor/title';
-import  { editorKeyActions }  from '../../components/Editor/editorKeyAction';
-import { titleKeyActions } from '../../components/Editor/titleKeyAction';
+import { Title } from '../../components/Editor/Title/title';
+import  { editorKeyActions }  from '../../components/Editor/editor/editorKeyAction';
+import { titleKeyActions } from '../../components/Editor/Title/titleKeyAction';
 
 interface MyEditorProps {}
 

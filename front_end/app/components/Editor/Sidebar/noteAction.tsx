@@ -1,5 +1,5 @@
 import React from 'react';
-import axiosInstance from './axiosConfig';
+import axiosInstance from '../editor/axiosConfig';
 import { EditorState, convertFromRaw } from 'draft-js';
 import { NoteData } from '@/types/types';
 
@@ -20,7 +20,6 @@ export const handleNoteCreated = async (newNoteId: number, setNotes: React.Dispa
       id: parseInt(response.data.data.id, 10),
       title: response.data.data.attributes.title,
       body: response.data.data.attributes.body,
-      createdAt: response.data.data.attributes.createdAt // 'createdAt' プロパティを追加
     };
     console.log('setNotes called from handleNoteCreated');
     setNotes([newNote, ...notes]);

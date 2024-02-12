@@ -1,19 +1,28 @@
 import { useState, useEffect } from "react";
+import ModalOverlay from "./modalOverlay";
 
-interface RhymeSearchModalProps {
+interface SearchResultModalProps {
   searchResults: any[];
   isOpen: boolean;
   onClose: () => void;
   onWordSelect: (word: string) => void;
   position?: { x: number; y: number };
+  editorPosition: {
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+  };
+  animate?: boolean;
 }
 
-const RhymeSearchModal: React.FC<RhymeSearchModalProps> = ({
+const SearchResultModal: React.FC<SearchResultModalProps> = ({
   searchResults,
   isOpen,
   onClose,
   onWordSelect,
-  position
+  position,
+  editorPosition,
 }) => {
   const [render, setRender] = useState(false);
   const [animate, setAnimate] = useState(false);
@@ -55,23 +64,23 @@ const RhymeSearchModal: React.FC<RhymeSearchModalProps> = ({
 
   if (!render) return null;
 
-  const modalClassName = `fixed inset-0 transition-opacity duration-300 ${animate ? 'opacity-100' : 'opacity-0'}`;
+  const { width, left } = editorPosition;
 
-  const modalContentStyle = {
-    position: 'absolute',
-    top: position ? `${position.y}px` : '50%',
-    left: position ?`${position.x}px` : '50%',
-    transform: animate ? 'translate(-50%) scale(1)' : 'translate(-50%) scale(0.8)',
+  const modalContentStyle: React.CSSProperties = {
+    position: 'fixed', // Updated to fixed to position relative to viewport
+    top:  position ? `${position.y}px` : '50%',
+    left: `${left}px`,
+    width: `${width}px`,
+    transform: position ? 'none' : 'translate(-50%, -50%)', // Adjusted for custom position
     opacity: animate ? 1 : 0,
-    transition: 'transform 0.3s ease-out, opacity 0.3s ease-out',
-    backgroundColor: '#fff',
+    transition: 'opacity 0.3s ease-out',
+    backgroundColor: '#fafaf9',
     padding: '20px',
     borderRadius: '4px',
     boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)',
     maxHeight: '50vh',
-
+    overflowY: 'auto',
     zIndex: 1050,
-    
   };
 
   const selectionModalStyle = {
@@ -86,34 +95,27 @@ const RhymeSearchModal: React.FC<RhymeSearchModalProps> = ({
   };
 
   return (
-    <div className={modalClassName} onClick={handleClose}>
-      <div
-        className="modal-content"
-        style={modalContentStyle as React.CSSProperties}
-        onClick={(e) => e.stopPropagation()}
-      >
+      <>
+        <ModalOverlay isOpen={isOpen} onClose={handleClose} animate={animate} />
+          <div
+            className="modal-content"
+            style={modalContentStyle}
+            onClick={(e) => e.stopPropagation()}
+          >
         <ul>
           {searchResults.map((result, index) => (
             <li
               key={index}
               onClick={() => onWordSelect(result)}
-              className="hover:bg-gray-200 cursor-pointer"
+              className="hover:bg-indigo-100 cursor-pointer"
             >
-             <span onMouseEnter={(e) => handleWordHover(e, result)}>{result}</span>
+              {result}
             </li>
           ))}
         </ul>
-        {selectionModalOpen && (
-          <div style={selectionModalStyle as React.CSSProperties}>
-            <ul>
-              <li className="cursor-pointer hover:bg-gray-100" onClick={() => onWordSelect(selectedWord + " ")}>右に配置</li>
-              <li className="cursor-pointer hover:bg-gray-100" onClick={() => onWordSelect(selectedWord)}>置換する</li>
-            </ul>
-          </div>
-        )}
       </div>
-    </div>
-  );
+      </>
+    );
 };
 
-export default RhymeSearchModal;
+export default SearchResultModal;

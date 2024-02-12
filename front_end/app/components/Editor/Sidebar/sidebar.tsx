@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import UserProfile from './userProfile';
 import CreateNoteButton from './createNoteButton';
-import axiosInstance from './axiosConfig';
+import axiosInstance from '../editor/axiosConfig';
 import { NoteData } from '@/types/types';
 import { FaRegTrashAlt } from "react-icons/fa";
-
-
 
 interface SidebarProps {
   notes: NoteData[];
@@ -68,7 +66,7 @@ const Sidebar: React.FC<SidebarProps> = ({ notes, noteId, onNoteCreated, onSelec
     }}>
       <div className="sidebar-content" style={{
         opacity: isSidebarOpen ? 1 : 0,
-        transform: isSidebarOpen ? 'translateX(0)' : `translateX(-100%)`,
+        transform: isSidebarOpen ? 'translateX(0%)' : `translateX(-100%)`,
         transition: 'opacity 0.3s ease, transform 0.3s ease',
         pointerEvents: isSidebarOpen ? 'auto' : 'none'
       }}>

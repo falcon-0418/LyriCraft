@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import axiosInstance from '../components/Editor/axiosConfig';
+import axiosInstance from '../components/Editor/editor/axiosConfig';
 
 declare global {
   interface Window { google: any; }
@@ -51,7 +51,7 @@ const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({ clientId }) => {
         sessionStorage.setItem('accessToken', accessToken);
       }
         alert('ログインしました。');
-        router.push('/editor');
+        router.push('components/Editor/editor');
       }
     } catch (error) {
       console.error('バックエンドへのリクエストエラー:', error);

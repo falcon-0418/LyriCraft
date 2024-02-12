@@ -25,7 +25,7 @@ const WritingAiButton = () => {
         cursor: 'pointer'
       }}
     >
-      ログインしてAIに書いてもらう
+      ログインしてMyNoteにLyricを書く
     </button>
   );
 };

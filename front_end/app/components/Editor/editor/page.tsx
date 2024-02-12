@@ -1,31 +1,40 @@
 "use client"
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation'
-import { replaceText } from '../components/Editor/textUtils';
-import axiosInstance from '../components/Editor/axiosConfig';
-import Sidebar from "../components/Editor/sidebar";
-import { Title } from '../components/Editor/title';
-import { NoteData } from '@/types/types';
-import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
-import NoteActions,{ handleNoteCreated, handleSelectNote, handleDeleteNote } from '../components/Editor/noteAction';
+import useSelectedText from '../Hooks/useSelectedText'
+import useSelectionPosition from '../Hooks/useSelectionPosition';
+import useEditorPosition from '../Hooks/useEditorPosition';
+
 import { EditorState, convertFromRaw } from 'draft-js';
-import { titleKeyActions } from '../components/Editor/titleKeyAction';
-import { editorKeyActions } from '../components/Editor/editorKeyAction';
-import AutoSaveComponent from '../components/Editor/autoSave';
 import Editor from '@draft-js-plugins/editor';
-import InlineToolbarComponent from '../components/Editor/inlineToolbar';
-import RhymeSearchModal from '../components/Editor/searchResultModal';
-import useSelectedText from '../hooks/useSelectedText'
-import useSelectionPosition from '../hooks/useSelectionPosition';
+import '@draft-js-plugins/anchor/lib/plugin.css';
+
+import InlineToolbarComponent from '../InlineToolbar/inlineToolbar';
 import createInlineToolbarPlugin from '@draft-js-plugins/inline-toolbar';
 import createLinkPlugin from '@draft-js-plugins/anchor';
 import createLinkifyPlugin from '@draft-js-plugins/linkify';
-import blockStyleFn from "../components/Editor/blockStyleClasses";
-import '@draft-js-plugins/anchor/lib/plugin.css';
+import blockStyleFn from "../InlineToolbar/blockStyleClasses";
+
+import axiosInstance from './axiosConfig';
+import AutoSaveComponent from './autoSave';
+import Sidebar from "../Sidebar/sidebar";
+import { Title } from '../Title/title';
+import { NoteData } from '@/types/types';
+import NoteActions,{ handleNoteCreated, handleSelectNote, handleDeleteNote } from '../Sidebar/noteAction';
+
+import { titleKeyActions } from '../Title/titleKeyAction';
+import { editorKeyActions } from './editorKeyAction';
+import SearchResultModal from '../Modal/searchResultModal';
+import { replaceText } from '../textUtils';
+
+import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 
 interface MyEditorProps {}
 
 const MyEditor: React.FC<MyEditorProps> = () => {
+
+  const [editorState, setEditorState] = useState<EditorState>(EditorState.createEmpty());
+
   const [plugins, InlineToolbar, LinkButton] = useMemo(() => {
     const linkPlugin = createLinkPlugin({ placeholder: 'https://...' });
     const linkifyPlugin = createLinkifyPlugin();
@@ -37,23 +46,40 @@ const MyEditor: React.FC<MyEditorProps> = () => {
     ];
   }, []);
 
-  const [editorState, setEditorState] = useState<EditorState>(EditorState.createEmpty());
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+
   const [notes, setNotes] = useState<NoteData[]>([]);
   const [noteId, setNoteId] = useState<number | null>(null);
   const [noteTitle, setNoteTitle] = useState<string>("");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+
   const selectedText = useSelectedText(editorState);
-  const selectionPosition = useSelectionPosition();
+  const selectionPosition = useSelectionPosition(isModalOpen);
+
   const router = useRouter();
 
-  const editorRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const editorRef = useRef<HTMLDivElement>(null);
+  const savedSidebarWidth = localStorage.getItem('sidebarWidth');
+  const initialSidebarWidth = savedSidebarWidth ? parseInt(savedSidebarWidth, 10) : 250;
+  const [sidebarWidth, setSidebarWidth] = useState(initialSidebarWidth);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const editorPosition = useEditorPosition(editorRef, isSidebarOpen, sidebarWidth);
+
+  const editorActions = editorKeyActions({ editorState, setEditorState, textareaRef });
+  const handleKeyCommand = editorActions.handleKeyCommand;
+  const keyBindingFn = editorActions.keyBindingFn;
+
+  const onChange = (value: EditorState) => {
+    setEditorState(value);
+  };
 
   useEffect(() => {
-    console.log("Current selection position:", selectionPosition);
-  }, [selectionPosition]);
+    const accessToken = sessionStorage.getItem('accessToken');
+    if (!accessToken) {
+      router.push('/login');
+    }
+  }, [router]);
 
   const onNewNoteCreated = async (newNote: NoteData | null) => {
     if (newNote !== null) {
@@ -61,6 +87,15 @@ const MyEditor: React.FC<MyEditorProps> = () => {
       setNoteId(newNote.id);
       setNoteTitle(newNote.title);
       setEditorState(EditorState.createEmpty());
+    }
+  };
+
+  const onSelectNote = async (selectedNoteId: number) => {
+    await handleSelectNote(selectedNoteId, setNoteId, setNoteTitle, setEditorState);
+
+    localStorage.setItem('lastSelectedNoteId', selectedNoteId.toString());
+    if (textareaRef.current) {
+      textareaRef.current.focus();
     }
   };
 
@@ -74,15 +109,6 @@ const MyEditor: React.FC<MyEditorProps> = () => {
       setEditorState(EditorState.createEmpty());
       setNoteId(null);
       setNoteTitle("");
-    }
-  };
-
-  const onSelectNote = async (selectedNoteId: number) => {
-    await handleSelectNote(selectedNoteId, setNoteId, setNoteTitle, setEditorState);
-
-    localStorage.setItem('lastSelectedNoteId', selectedNoteId.toString());
-    if (textareaRef.current) {
-      textareaRef.current.focus();
     }
   };
 
@@ -113,6 +139,7 @@ const MyEditor: React.FC<MyEditorProps> = () => {
     fetchNotes();
   }, []);
 
+
   const titleActions = titleKeyActions({
     textareaRef,
     onEnter: () => {
@@ -123,17 +150,8 @@ const MyEditor: React.FC<MyEditorProps> = () => {
       }
     }
   });
-
   const handleKeyDown = titleActions.handleKeyDown;
 
-  const editorActions = editorKeyActions({ editorState, setEditorState, textareaRef });
-  const handleKeyCommand = editorActions.handleKeyCommand;
-  const keyBindingFn = editorActions.keyBindingFn;
-
-  const savedSidebarWidth = localStorage.getItem('sidebarWidth');
-  const initialSidebarWidth = savedSidebarWidth ? parseInt(savedSidebarWidth, 10) : 250;
-
-  const [sidebarWidth, setSidebarWidth] = useState(initialSidebarWidth);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -143,22 +161,11 @@ const MyEditor: React.FC<MyEditorProps> = () => {
   const handleWordSelect = (word: string) => {
     const newEditorState = replaceText(editorState, word);
     setEditorState(newEditorState);
-    setIsModalOpen(false); // モーダルを閉じる
-  };
-
-  useEffect(() => {
-    const accessToken = sessionStorage.getItem('accessToken');
-    if (!accessToken) {
-      router.push('/login');
-    }
-  }, [router]);
-
-  const onChange = (value: EditorState) => {
-    setEditorState(value);
+    setIsModalOpen(false);
   };
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-stone-50">
       <div className="fixed top-0 left-0 bottom-0"style={{
         width: isSidebarOpen ? sidebarWidth : 0,
         transition: 'width 0.3s ease'
@@ -202,22 +209,22 @@ const MyEditor: React.FC<MyEditorProps> = () => {
               setNotes={setNotes}
               notes={notes}
               placeholder="NewTitle"
-              className="mt-36 border-none text-4xl font-bold focus:ring-0 p-2 rounded resize-none mb-4 text-gray-700"
+              className="mt-36 border-none bg-stone-50 text-4xl font-bold focus:ring-0 p-2 rounded resize-none mb-4 text-gray-700"
               style={{ overflow: 'hidden', paddingLeft: '1px'}}
               isSynchronized={true}
               onKeyDown={handleKeyDown}
             />
-          <div className="public-DraftEditor-content mb-32 w-full text-gray-700">
-            <Editor
-              editorState={editorState}
-              onChange={onChange}
-              plugins={plugins}
-              blockStyleFn={blockStyleFn}
-              ref={editorRef}
-              handleKeyCommand={handleKeyCommand}
-              keyBindingFn={keyBindingFn}
-            />
-          </div>
+            <div ref={editorRef} className="public-DraftEditor-content mb-32 w-full text-gray-700">
+              <Editor
+                editorState={editorState}
+                onChange={onChange}
+                plugins={plugins}
+                blockStyleFn={blockStyleFn}
+                ref={editorRef}
+                handleKeyCommand={handleKeyCommand}
+                keyBindingFn={keyBindingFn}
+              />
+            </div>
             <InlineToolbarComponent
               editorState={editorState}
               setEditorState={setEditorState}
@@ -229,11 +236,12 @@ const MyEditor: React.FC<MyEditorProps> = () => {
             />
           </div>
         </div>
-        <RhymeSearchModal
+        <SearchResultModal
           searchResults={searchResults}
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           position={selectionPosition}
+          editorPosition={editorPosition}
           onWordSelect={handleWordSelect}
         />
       <NoteActions

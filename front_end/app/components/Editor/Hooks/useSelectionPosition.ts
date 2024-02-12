@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-const useSelectionPosition = () => {
+const useSelectionPosition = (isModalOpen: boolean) => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
@@ -21,11 +21,13 @@ const useSelectionPosition = () => {
     };
 
     document.addEventListener('mouseup', updatePosition);
+    document.addEventListener('keyup', updatePosition);
 
     return () => {
       document.removeEventListener('mouseup', updatePosition);
+      document.removeEventListener('keyup', updatePosition);
     };
-  }, []);
+  }, [isModalOpen]); // 依存配列にisModalOpenを追加
 
   return position;
 };

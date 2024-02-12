@@ -1,5 +1,5 @@
 import React, { useRef, useImperativeHandle, forwardRef, useEffect } from 'react';
-import axiosInstance from './axiosConfig';
+import axiosInstance from '../editor/axiosConfig';
 import { NoteData } from '@/types/types';
 
 interface TitleProps {

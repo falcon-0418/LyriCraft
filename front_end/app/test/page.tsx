@@ -1,6 +1,6 @@
 "use client"
 import React, {  useState, useMemo, Dispatch, SetStateAction } from 'react';
-import InlineToolbarComponent from '../components/Editor/inlineToolbar';
+import InlineToolbarComponent from '../components/Editor/InlineToolbar/inlineToolbar';
 import { EditorState, ContentState } from 'draft-js';
 import Editor from '@draft-js-plugins/editor';
 import createInlineToolbarPlugin from '@draft-js-plugins/inline-toolbar';
