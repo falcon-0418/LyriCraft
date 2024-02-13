@@ -16,16 +16,13 @@ interface RhymeResult {
     setSearchResults,
     setIsModalOpen
   }) => {
-    console.log("RhymeSearchButton: selectedText received:", selectedText);
   const handleRhymeSearch = async () => {
-    console.log("RhymeSearchButton clicked with text:", selectedText);
     if (!selectedText) {
         return;
       }
 
     try {
       const response = await axiosInstance.get(`/rhyme_search?word=${(selectedText)}`);
-      console.log("API Response:", response.data);
       setSearchResults(response.data);
       setIsModalOpen(true);
     } catch (error) {

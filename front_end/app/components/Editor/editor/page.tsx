@@ -138,7 +138,6 @@ const MyEditor: React.FC<MyEditorProps> = () => {
     fetchNotes();
   }, []);
 
-
   const titleActions = titleKeyActions({
     textareaRef,
     onEnter: () => {

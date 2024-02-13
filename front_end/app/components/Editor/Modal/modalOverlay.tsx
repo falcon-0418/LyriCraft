@@ -7,13 +7,10 @@ const ModalOverlay: React.FC<{ isOpen: boolean; onClose: () => void; animate: bo
 }) => {
   useEffect(() => {
     if (isOpen) {
-      // モーダル表示中にページ全体のテキスト選択を無効にする
       document.body.style.userSelect = 'none';
     } else {
-      // モーダルが閉じたら設定を解除する
       document.body.style.userSelect = '';
     }
-    // コンポーネントのアンマウント時に設定を確実に解除する
     return () => {
       document.body.style.userSelect = '';
     };

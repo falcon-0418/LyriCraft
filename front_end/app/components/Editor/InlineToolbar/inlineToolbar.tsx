@@ -30,14 +30,8 @@ const InlineToolbarComponent: React.FC<InlineToolbarComponentProps> = ({
   setIsModalOpen,
   selectedText
 }) => {
-  console.log("Selected text:", selectedText);
-
-  const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    console.log('Toolbar click event:', event);
-  };
 
   return (
-    <div onClick={handleClick}>
     <InlineToolbar>
       {(externalProps: any) => (
         <>
@@ -58,7 +52,6 @@ const InlineToolbarComponent: React.FC<InlineToolbarComponentProps> = ({
         </>
       )}
     </InlineToolbar>
-    </div>
   );
 };
 
