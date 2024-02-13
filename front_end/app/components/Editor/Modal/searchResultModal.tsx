@@ -6,7 +6,7 @@ interface SearchResultModalProps {
   searchResults: any[];
   isOpen: boolean;
   onClose: () => void;
-  onWordSelect: (word: string) => void;
+  onWordSelect: (word: string, append: boolean) => void;
   position?: { x: number; y: number };
   editorPosition: {
     left: number;
@@ -15,6 +15,7 @@ interface SearchResultModalProps {
     height: number;
   };
   animate?: boolean;
+  result?: string
 }
 
 const SearchResultModal: React.FC<SearchResultModalProps> = ({
@@ -27,7 +28,16 @@ const SearchResultModal: React.FC<SearchResultModalProps> = ({
 }) => {
   const [render, setRender] = useState(false);
   const [animate, setAnimate] = useState(false);
-  const { selectionModalOpen, setSelectionModalOpen, selectionModalPosition, selectedWord, handleWordHover } = useHoverModal();
+  const [hoveredResult, setHoveredResult] = useState<string | null>(null);
+  const {
+    selectionModalOpen,
+    setSelectionModalOpen,
+    selectionModalPosition,
+    selectedWord,
+    handleWordHover,
+    selectedResult,
+    setSelectedResult
+  } = useHoverModal();
 
   useEffect(() => {
     if (isOpen) {
@@ -42,6 +52,16 @@ const SearchResultModal: React.FC<SearchResultModalProps> = ({
   const handleClose = () => {
     setSelectionModalOpen(false);
     onClose();
+  };
+
+  useEffect(() => {
+    if (!isOpen) {
+      setHoveredResult(null);
+    }
+  }, [isOpen]);
+
+  const handleMouseEnter = (result: string) => {
+    setHoveredResult(result);
   };
 
   if (!render) return null;
@@ -69,6 +89,8 @@ const SearchResultModal: React.FC<SearchResultModalProps> = ({
     position: 'fixed',
     top: `${selectionModalPosition.y}px`,
     left: `${selectionModalPosition.x}px`,
+    display: 'flex',
+    flexDirection: 'column',
     backgroundColor: 'white',
     boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
     padding: '10px',
@@ -84,26 +106,36 @@ const SearchResultModal: React.FC<SearchResultModalProps> = ({
             style={modalContentStyle}
             onClick={(e) => e.stopPropagation()}
           >
-        <ul>
-          {searchResults.map((result, index) => (
-            <li
-              key={index}
-              onMouseOver={(e) => handleWordHover(e, result)}
-              onClick={() => onWordSelect(result)}
-              className="hover:bg-indigo-100 cursor-pointer"
-            >
-              {result}
-            </li>
-          ))}
-        </ul>
-      </div>
-      {selectionModalOpen && (
-    <div style={selectionModalStyle}>
-      <p>{selectedWord}</p>
-    </div>
-  )}
-      </>
-    );
+            <ul>
+              {searchResults.map((result, index) => (
+                <li
+                  key={index}
+                  onMouseOver={(e) => handleWordHover(e, result)}
+                  onMouseEnter={() => handleMouseEnter(result)}
+                  onClick={() => {
+                    setSelectedResult(result); 
+                    onWordSelect(selectedWord, false);
+                  }}
+                  style={{
+                    backgroundColor: hoveredResult === result ? '#e0f2fe' : 'transparent',
+                    cursor: 'pointer',
+                    padding: '5px 10px',
+                    borderRadius: '4px'
+                  }}
+                >
+                  {result}
+                </li>
+              ))}
+            </ul>
+         </div>
+        {selectionModalOpen && (
+          <div style={selectionModalStyle}>
+            <button className="hover:bg-indigo-100 rounded p-1 text-teal-700 font-medium" onClick={() => onWordSelect(selectedWord, true)}>右に配置</button>
+            <button className="hover:bg-indigo-100 rounded p-1 text-pink-700 font-medium" onClick={() => onWordSelect(selectedWord, false)}>置き換え</button>
+          </div>
+        )}
+    </>
+  );
 };
 
 export default SearchResultModal;

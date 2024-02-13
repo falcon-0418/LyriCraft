@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { EditorState, convertFromRaw, convertToRaw } from 'draft-js';
-import { replaceText } from '../../components/Editor/textUtils';
+import { replaceText } from '../../components/Editor/editor/textUtils';
 import Editor from '@draft-js-plugins/editor';
 import createInlineToolbarPlugin from '@draft-js-plugins/inline-toolbar';
 import createLinkPlugin from '@draft-js-plugins/anchor';

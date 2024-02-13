@@ -26,7 +26,7 @@ import NoteActions,{ handleNoteCreated, handleSelectNote, handleDeleteNote } fro
 import { titleKeyActions } from '../Title/titleKeyAction';
 import { editorKeyActions } from './editorKeyAction';
 import SearchResultModal from '../Modal/searchResultModal';
-import { replaceText } from '../textUtils';
+import { replaceOrAppendText } from './textUtils';
 
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 
@@ -150,8 +150,8 @@ const MyEditor: React.FC<MyEditorProps> = () => {
   });
   const handleKeyDown = titleActions.handleKeyDown;
 
-  const handleWordSelect = (word: string) => {
-    const newEditorState = replaceText(editorState, word);
+  const handleWordSelect = (word: string, append: boolean) => {
+    const newEditorState = replaceOrAppendText(editorState, word, append);
     setEditorState(newEditorState);
     setIsModalOpen(false);
   };

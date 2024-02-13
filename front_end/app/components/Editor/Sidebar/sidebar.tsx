@@ -17,7 +17,16 @@ interface SidebarProps {
   style?: React.CSSProperties;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ notes, noteId, onNoteCreated, onSelectNote, onDeleteNote, sidebarWidth, setSidebarWidth, isSidebarOpen }) => {
+const Sidebar: React.FC<SidebarProps> = ({
+  notes,
+  noteId,
+  onNoteCreated,
+  onSelectNote,
+  onDeleteNote,
+  sidebarWidth,
+  setSidebarWidth,
+  isSidebarOpen
+}) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
@@ -86,7 +95,7 @@ const Sidebar: React.FC<SidebarProps> = ({ notes, noteId, onNoteCreated, onSelec
                 <li
                   key={note.id}
                   className={ `text-gray-500 mb-1 p-2 flex justify-between items-center
-                    ${note.id === noteId ? 'bg-indigo-100 border-l-4 border-indigo-500' : 'hover:bg-indigo-50'}`}
+                    ${note.id === noteId ? 'bg-indigo-100 border-l-4 border-fuchsia-500' : 'hover:bg-indigo-50'}`}
                   onClick={() => onSelectNote(note.id)}
                 >
                   <span className="text-[14px] truncate cursor-pointer">
