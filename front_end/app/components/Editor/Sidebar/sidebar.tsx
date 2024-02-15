@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import UserProfile from './userProfile';
 import CreateNoteButton from './createNoteButton';
 import axiosInstance from '../editor/axiosConfig';
@@ -30,6 +30,9 @@ const Sidebar: React.FC<SidebarProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const sidebarRef = useRef<HTMLDivElement>(null);
+
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -50,30 +53,54 @@ const Sidebar: React.FC<SidebarProps> = ({
     setIsModalOpen(!isModalOpen);
   };
 
-  const handleDrag = (e: MouseEvent) => {
-    const newWidth = Math.min(Math.max(e.clientX, 250), 400);
-    setSidebarWidth(newWidth);
-    localStorage.setItem('sidebarWidth', newWidth.toString());
-  };
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
 
-  const handleMouseUp = () => {
-    window.removeEventListener('mousemove', handleDrag as any);
-    window.removeEventListener('mouseup', handleMouseUp);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (windowWidth < 640 && isSidebarOpen) {
+      // スマホサイズでサイドバーが開いている場合は、画面幅いっぱいにする
+      setSidebarWidth(window.innerWidth);
+    } else {
+      // スマホサイズ以外では、初期またはドラッグによって設定された幅を使用
+      setSidebarWidth(Math.min(Math.max(sidebarWidth, 250), 400));
+    }
+  }, [windowWidth, isSidebarOpen, setSidebarWidth, sidebarWidth]);
+
+  const handleDrag = (e: MouseEvent) => {
+    if (windowWidth >= 640) { // ドラッグ操作はスマホサイズでは無効
+      const newWidth = Math.min(Math.max(e.clientX, 250), 400);
+      setSidebarWidth(newWidth);
+      localStorage.setItem('sidebarWidth', newWidth.toString());
+    }
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
-    window.addEventListener('mousemove', handleDrag as any);
-    window.addEventListener('mouseup', handleMouseUp);
+    if (windowWidth >= 640) {
+      window.addEventListener('mousemove', handleDrag as any);
+      window.addEventListener('mouseup', () => {
+        window.removeEventListener('mousemove', handleDrag as any);
+      });
+    }
   };
 
   return (
-    <div className="sidebar-container" style={{
-      width: isSidebarOpen ? `${sidebarWidth}px` : "0",
-      position: 'relative',
-      transition: 'width 0.5s ease',
-      overflow: 'hidden'
-    }}>
+    <div
+      ref={sidebarRef}
+      className="sidebar-container"
+      style={{
+        width: isSidebarOpen ? `${sidebarWidth}px` : "0",
+        position: 'relative',
+        transition: 'width 0.5s ease',
+        overflow: 'hidden'
+      }}
+    >
       <div className="sidebar-content" style={{
         opacity: isSidebarOpen ? 1 : 0,
         transform: isSidebarOpen ? 'translateX(0%)' : `translateX(-100%)`,
@@ -81,7 +108,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         pointerEvents: isSidebarOpen ? 'auto' : 'none'
       }}>
         <div className="mb-4 p-1">
-          <h3 className="py-2 px-6 text-lg text-gray-500 bg-white hover:bg-gray-100 border-r font-semibold cursor-pointer"
+          <h3 className="py-2 px-6 text-lg text-gray-500 bg-white hover:bg-indigo-50 border-r font-semibold cursor-pointer"
               onClick={toggleModal}>{userName}
           </h3>
         </div>

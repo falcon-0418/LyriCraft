@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import useHoverModal from "../Hooks/useHoverModal";
+import useAutoScrollModal from "../Hooks/useAutoScrollModal";
 import ModalOverlay from "./modalOverlay";
 
 interface SearchResultModalProps {
@@ -29,17 +30,19 @@ const SearchResultModal: React.FC<SearchResultModalProps> = ({
   const [render, setRender] = useState(false);
   const [animate, setAnimate] = useState(false);
   const [hoveredResult, setHoveredResult] = useState<string | null>(null);
+  const modalRef = useRef<HTMLDivElement>(null); // モーダルのための ref を作成
+  useAutoScrollModal(modalRef, animate);
   const {
     selectionModalOpen,
     setSelectionModalOpen,
     selectionModalPosition,
     selectedWord,
     handleWordHover,
-    selectedResult,
     setSelectedResult
   } = useHoverModal();
 
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
     if (isOpen) {
       setRender(true);
       setTimeout(() => setAnimate(true), 10);
@@ -47,6 +50,7 @@ const SearchResultModal: React.FC<SearchResultModalProps> = ({
       setAnimate(false);
       setTimeout(() => setRender(false), 300);
     }
+    return () => clearTimeout(timeoutId);
   }, [isOpen]);
 
   const handleClose = () => {
@@ -69,7 +73,7 @@ const SearchResultModal: React.FC<SearchResultModalProps> = ({
   const { width, left } = editorPosition;
 
   const modalContentStyle: React.CSSProperties = {
-    position: 'fixed',
+    position: 'absolute',
     top:  position ? `${position.y}px` : '50%',
     left: `${left}px`,
     width: `${width}px`,
@@ -86,7 +90,7 @@ const SearchResultModal: React.FC<SearchResultModalProps> = ({
   };
 
   const selectionModalStyle: React.CSSProperties = {
-    position: 'fixed',
+    position: 'absolute',
     top: `${selectionModalPosition.y}px`,
     left: `${selectionModalPosition.x}px`,
     display: 'flex',
@@ -102,6 +106,7 @@ const SearchResultModal: React.FC<SearchResultModalProps> = ({
       <>
         <ModalOverlay isOpen={isOpen} onClose={handleClose} animate={animate} />
           <div
+            ref={modalRef}
             className="modal-content"
             style={modalContentStyle}
             onClick={(e) => e.stopPropagation()}
@@ -113,7 +118,7 @@ const SearchResultModal: React.FC<SearchResultModalProps> = ({
                   onMouseOver={(e) => handleWordHover(e, result)}
                   onMouseEnter={() => handleMouseEnter(result)}
                   onClick={() => {
-                    setSelectedResult(result); 
+                    setSelectedResult(result);
                     onWordSelect(selectedWord, false);
                   }}
                   style={{

@@ -14,7 +14,7 @@ const useSelectionPosition = (isModalOpen: boolean) => {
         if (parentElement && !parentElement.closest('.modal-content')) {
           setPosition({
             x: rect.left,
-            y: rect.bottom
+            y: rect.bottom + window.scrollY
           });
         }
       }
@@ -27,7 +27,7 @@ const useSelectionPosition = (isModalOpen: boolean) => {
       document.removeEventListener('mouseup', updatePosition);
       document.removeEventListener('keyup', updatePosition);
     };
-  }, [isModalOpen]); // 依存配列にisModalOpenを追加
+  }, [isModalOpen]);
 
   return position;
 };

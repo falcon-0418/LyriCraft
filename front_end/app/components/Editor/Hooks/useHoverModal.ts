@@ -14,7 +14,7 @@ const useHoverModal = () => {
 
       setSelectionModalPosition({
         x: modalPositionX,
-        y: modalPositionY
+        y: modalPositionY + window.scrollY
       });
 
       if (!selectionModalOpen || selectedWord !== word) {

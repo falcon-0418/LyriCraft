@@ -10,5 +10,6 @@
   }
 
   .bpsgbes {
-    @apply bg-white  border  shadow-lg;
+    @apply bg-black;
   }
+  

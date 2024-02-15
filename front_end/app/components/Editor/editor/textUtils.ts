@@ -23,7 +23,7 @@ export const replaceOrAppendText = (
     newContentState = Modifier.insertText(
       contentState,
       newSelectionState,
-      ` ${replacementText}`
+      `${replacementText}`
     );
   } else {
     // 選択テキストを置換
