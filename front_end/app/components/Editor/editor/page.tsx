@@ -69,7 +69,6 @@ const MyEditor: React.FC<MyEditorProps> = () => {
   const editorRef = useRef<HTMLDivElement>(null);
 
   const { isSidebarOpen, toggleSidebar, sidebarWidth, setSidebarWidth } = useSidebar();
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const editorPosition = useEditorPosition(editorRef, isSidebarOpen, sidebarWidth);
 
   const editorActions = editorKeyActions({ editorState, setEditorState, textareaRef });
@@ -165,25 +164,13 @@ const MyEditor: React.FC<MyEditorProps> = () => {
     setIsModalOpen(false);
   };
 
-  useEffect(() => {
-    function handleResize() {
-      setWindowWidth(window.innerWidth);
-    }
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  const editorWidth = isSidebarOpen ? `calc(100% - ${sidebarWidth}px)` : '100%';
-
   return (
-    <div className="flex min-h-screen bg-stone-50 overflow-x-hidden">
-      <div className="fixed top-0 left-0 bottom-0"
-        style={{
-          width: editorWidth,
-          transition: 'width 0.5s ease'
-        }}
-        >
+    <div className="flex min-h-screen bg-stone-50">
+      <div className="fixed top-0 left-0 bottom-0"style={{
+        width: isSidebarOpen ? `${sidebarWidth}px` : '0',
+        transition: 'width 0.5s ease'
+
+      }}>
         <Sidebar
           notes={notes}
           onSelectNote={onSelectNote}
@@ -194,23 +181,20 @@ const MyEditor: React.FC<MyEditorProps> = () => {
           sidebarWidth={sidebarWidth}
           noteId={noteId}
         />
-        <button
-          onClick={toggleSidebar}
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: isSidebarOpen ? sidebarWidth : 0,
-            transition: 'left 0.5s ease'
-          }}
-        >
-          {
-            isSidebarOpen
-              ? <RiMenuFoldFill style={{ fontSize: '30px', margin: '5px'}}/>
-              : <RiMenuUnfoldFill style={{ fontSize: '30px', margin: '5px' }}/>
-          }
-        </button>
       </div>
-      <div
+      <button onClick={toggleSidebar} style={{
+        position: 'fixed',
+        top: 0,
+        left: isSidebarOpen ? sidebarWidth : 0,
+        transition: 'left 0.5s ease'
+      }}>
+        {
+          isSidebarOpen
+            ? <RiMenuFoldFill style={{ fontSize: '30px', margin: '5px'}}/>
+            : <RiMenuUnfoldFill style={{ fontSize: '30px', margin: '5px' }}/>
+        }
+      </button>
+        <div
           className="flex flex-col items-center justify-start" style={{
             marginLeft: isSidebarOpen ? sidebarWidth : 0,
             width: isSidebarOpen ? `calc(100% - ${sidebarWidth}px)` : '100%',
@@ -253,7 +237,6 @@ const MyEditor: React.FC<MyEditorProps> = () => {
             />
           </div>
         </div>
-
         <SearchResultModal
           searchResults={searchResults}
           isOpen={isModalOpen}

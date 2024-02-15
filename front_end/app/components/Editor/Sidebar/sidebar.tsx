@@ -93,7 +93,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   return (
     <div
       ref={sidebarRef}
-      className="sidebar-container"
+      className="sidebar-container bg-stone-50"
       style={{
         width: isSidebarOpen ? `${sidebarWidth}px` : "0",
         position: 'relative',
