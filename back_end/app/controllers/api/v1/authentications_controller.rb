@@ -22,7 +22,9 @@ class Api::V1::AuthenticationsController < Api::V1::BaseController
 
       if @user.errors.blank?
         @user.update(is_social_login: true)
-        @user.notes.create(title: '', body: '')
+        if @user.new_record?
+          @user.notes.create(title: '', body: '')
+        end
 
         create_or_update_social_profile(@user, user_info)
 

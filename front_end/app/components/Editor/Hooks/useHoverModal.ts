@@ -9,7 +9,8 @@ const useHoverModal = () => {
   const handleWordHover = (event: React.MouseEvent<HTMLElement>, word: string) => {
     if (!selectionModalOpen || (selectionModalOpen && selectedWord !== word)) {
       const hoverRect = event.currentTarget.getBoundingClientRect();
-      const modalPositionX = hoverRect.left - 100;
+      const isMobileSize = window.innerWidth <= 640;
+      const modalPositionX = isMobileSize ? hoverRect.right - 50 : hoverRect.left - 100;
       const modalPositionY = hoverRect.top - 10;
 
       setSelectionModalPosition({

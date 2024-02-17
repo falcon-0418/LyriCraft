@@ -64,16 +64,14 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   useEffect(() => {
     if (windowWidth < 640 && isSidebarOpen) {
-      // スマホサイズでサイドバーが開いている場合は、画面幅いっぱいにする
       setSidebarWidth(window.innerWidth);
     } else {
-      // スマホサイズ以外では、初期またはドラッグによって設定された幅を使用
       setSidebarWidth(Math.min(Math.max(sidebarWidth, 250), 400));
     }
   }, [windowWidth, isSidebarOpen, setSidebarWidth, sidebarWidth]);
 
   const handleDrag = (e: MouseEvent) => {
-    if (windowWidth >= 640) { // ドラッグ操作はスマホサイズでは無効
+    if (windowWidth >= 640) { 
       const newWidth = Math.min(Math.max(e.clientX, 250), 400);
       setSidebarWidth(newWidth);
       localStorage.setItem('sidebarWidth', newWidth.toString());
@@ -108,7 +106,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         pointerEvents: isSidebarOpen ? 'auto' : 'none'
       }}>
         <div className="mb-4 p-1">
-          <h3 className="py-2 px-6 text-lg text-gray-500 bg-white hover:bg-indigo-50 border-r font-semibold cursor-pointer"
+          <h3 className="py-2 px-2 text-lg text-gray-500 bg-white hover:bg-indigo-50 border-r font-semibold cursor-pointer"
               onClick={toggleModal}>{userName}
           </h3>
         </div>

@@ -30,7 +30,7 @@ const SearchResultModal: React.FC<SearchResultModalProps> = ({
   const [render, setRender] = useState(false);
   const [animate, setAnimate] = useState(false);
   const [hoveredResult, setHoveredResult] = useState<string | null>(null);
-  const modalRef = useRef<HTMLDivElement>(null); // モーダルのための ref を作成
+  const modalRef = useRef<HTMLDivElement>(null);
   useAutoScrollModal(modalRef, animate);
   const {
     selectionModalOpen,
@@ -86,7 +86,7 @@ const SearchResultModal: React.FC<SearchResultModalProps> = ({
     boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)',
     maxHeight: '40vh',
     overflowY: 'auto',
-    zIndex: 1050,
+    zIndex: 10,
   };
 
   const selectionModalStyle: React.CSSProperties = {
@@ -99,7 +99,7 @@ const SearchResultModal: React.FC<SearchResultModalProps> = ({
     boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
     padding: '10px',
     borderRadius: '4px',
-    zIndex: 1060,
+    zIndex: 20,
   };
 
   return (

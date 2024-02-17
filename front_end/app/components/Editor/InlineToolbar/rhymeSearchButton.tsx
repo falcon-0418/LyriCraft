@@ -36,7 +36,7 @@ interface RhymeResult {
     <button
     onMouseDown={onMouseDown}
     onClick={handleRhymeSearch}
-    className="your-button-styles font-light p-2 text-rose-500 pointer-events-auto hover:bg-neutral-100"
+    className="your-button-styles font-light p-2 text-fuchsia-500 pointer-events-auto hover:bg-neutral-100"
     >
       韻検索
     </button>

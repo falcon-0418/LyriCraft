@@ -5,21 +5,22 @@ import useSelectedText from '../Hooks/useSelectedText'
 import useSelectionPosition from '../Hooks/useSelectionPosition';
 import useEditorPosition from '../Hooks/useEditorPosition';
 import useSidebar from '../Hooks/useSidebar';
+import { useInitialContent } from '../Hooks/useInitialContent';
 
-import { EditorState, convertFromRaw, convertToRaw } from 'draft-js';
+import { EditorState, convertFromRaw, /* convertToRaw */ } from 'draft-js';
 import Editor from '@draft-js-plugins/editor';
 import '@draft-js-plugins/anchor/lib/plugin.css';
 
 import InlineToolbarComponent from '../InlineToolbar/inlineToolbar';
 import createInlineToolbarPlugin from '@draft-js-plugins/inline-toolbar';
-import createLinkPlugin from '@draft-js-plugins/anchor';
-import createLinkifyPlugin from '@draft-js-plugins/linkify';
+// import createLinkPlugin from '@draft-js-plugins/anchor';
+// import createLinkifyPlugin from '@draft-js-plugins/linkify';
 import blockStyleFn from "../InlineToolbar/blockStyleClasses";
 
 import axiosInstance from './axiosConfig';
 import AutoSaveComponent from './/autoSave';
 import Sidebar from "../Sidebar/sidebar";
-import { Title } from '../Title/title';
+import { Title, TitleRef } from '../Title/title';
 import { NoteData } from '@/types/types';
 import NoteActions,{ handleNoteCreated, handleSelectNote, handleDeleteNote } from '../Sidebar/noteAction';
 
@@ -29,31 +30,32 @@ import SearchResultModal from '../Modal/searchResultModal';
 import { replaceOrAppendText } from './/textUtils';
 
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
-import { decorator } from '../../Decorator/linkDecorator';
+// import { decorator } from '../../Decorator/linkDecorator';
 
 interface MyEditorProps {}
 
 const MyEditor: React.FC<MyEditorProps> = () => {
 
-  const [editorState, setEditorState] = React.useState<EditorState>(EditorState.createEmpty(decorator));
+  const initialEditorState = useInitialContent('/defaultContent.txt');
+  const [editorState, setEditorState] = React.useState<EditorState>(initialEditorState);
 
-  const contentState = editorState.getCurrentContent();
-  const rawContentState = convertToRaw(contentState);
-  const jsonContentState = JSON.stringify(rawContentState);
-  console.log(jsonContentState);
+  // const contentState = editorState.getCurrentContent();
+  // const rawContentState = convertToRaw(contentState);
+  // const jsonContentState = JSON.stringify(rawContentState);
+  // console.log(jsonContentState);
 
   const [notes, setNotes] = useState<NoteData[]>([]);
   const [noteId, setNoteId] = useState<number | null>(null);
   const [noteTitle, setNoteTitle] = useState<string>("");
 
-  const [plugins, InlineToolbar, LinkButton] = useMemo(() => {
-    const linkPlugin = createLinkPlugin({ placeholder: 'https://...' });
-    const linkifyPlugin = createLinkifyPlugin();
+  const [plugins, InlineToolbar, /* LinkButton */] = useMemo(() => {
+    // const linkPlugin = createLinkPlugin({ placeholder: 'https://...' });
+    // const linkifyPlugin = createLinkifyPlugin();
     const inlineToolbarPlugin = createInlineToolbarPlugin();
     return [
-      [inlineToolbarPlugin, linkPlugin, linkifyPlugin],
+      [inlineToolbarPlugin,/* linkPlugin, linkifyPlugin */],
       inlineToolbarPlugin.InlineToolbar,
-      linkPlugin.LinkButton,
+       // linkPlugin.LinkButton,
     ];
   }, []);
 
@@ -66,17 +68,19 @@ const MyEditor: React.FC<MyEditorProps> = () => {
   const router = useRouter();
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const titleRef = useRef<TitleRef>(null);
   const editorRef = useRef<HTMLDivElement>(null);
 
-  const { isSidebarOpen, toggleSidebar, sidebarWidth, setSidebarWidth } = useSidebar();
+  const { isSidebarOpen, setIsSidebarOpen, sidebarWidth, setSidebarWidth } = useSidebar();
+  const [isHovered, setIsHovered] = useState(false);
   const editorPosition = useEditorPosition(editorRef, isSidebarOpen, sidebarWidth);
 
   const editorActions = editorKeyActions({ editorState, setEditorState, textareaRef });
   const handleKeyCommand = editorActions.handleKeyCommand;
   const keyBindingFn = editorActions.keyBindingFn;
 
-  const onChange = (value: EditorState) => {
-    setEditorState(value);
+  const onChange = (newEditorState: EditorState) => {
+    setEditorState(newEditorState);
   };
 
   useEffect(() => {
@@ -95,9 +99,14 @@ const MyEditor: React.FC<MyEditorProps> = () => {
     }
   };
 
-  const onSelectNote = async (selectedNoteId: number) => {
-    await handleSelectNote(selectedNoteId, setNoteId, setNoteTitle, setEditorState);
+  const onSelectNote = async (selectedNoteId: number, closeSidebar: boolean = true) => {
+    await handleSelectNote(selectedNoteId, setNoteId, setNoteTitle, setEditorState, editorRef);
 
+    if (typeof window !== "undefined" && window.innerWidth <= 640 && closeSidebar) {
+      setTimeout(() => {
+          setIsSidebarOpen(false);
+      }, 100);
+    }
     localStorage.setItem('lastSelectedNoteId', selectedNoteId.toString());
     if (textareaRef.current) {
       textareaRef.current.focus();
@@ -109,7 +118,7 @@ const MyEditor: React.FC<MyEditorProps> = () => {
     const updatedNotes = notes.filter(note => note.id !== noteIdToDelete);
     if (updatedNotes.length > 0) {
       const firstNote = updatedNotes[0];
-      onSelectNote(firstNote.id);
+      onSelectNote(firstNote.id, false);
     } else {
       setEditorState(EditorState.createEmpty());
       setNoteId(null);
@@ -137,7 +146,6 @@ const MyEditor: React.FC<MyEditorProps> = () => {
           setNoteTitle(mostRecentNote.title);
           setEditorState(EditorState.createWithContent(
             convertFromRaw(JSON.parse(mostRecentNote.body))));
-            decorator
         }
       } catch (error) {
         console.error('Error fetching notes:', error);
@@ -164,13 +172,29 @@ const MyEditor: React.FC<MyEditorProps> = () => {
     setIsModalOpen(false);
   };
 
-  return (
-    <div className="flex min-h-screen bg-stone-50">
-      <div className="fixed top-0 left-0 bottom-0"style={{
-        width: isSidebarOpen ? `${sidebarWidth}px` : '0',
-        transition: 'width 0.5s ease'
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
 
-      }}>
+  useEffect(() => {
+    if (!isSidebarOpen) {
+      titleRef.current?.adjustHeight();
+    }
+  }, [isSidebarOpen]);
+
+  const containerClasses = `flex min-h-screen bg-stone-50 overflow-x-hidden max-w-full`;
+
+  return (
+    <div className={containerClasses} >
+      <div className="fixed top-0 left-0 bottom-0"
+        style={{
+          width: isSidebarOpen || isHovered ? `${sidebarWidth}px` : '0',
+          transition: 'width 0.5s ease'
+
+        }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
         <Sidebar
           notes={notes}
           onSelectNote={onSelectNote}
@@ -182,36 +206,38 @@ const MyEditor: React.FC<MyEditorProps> = () => {
           noteId={noteId}
         />
       </div>
-      <button onClick={toggleSidebar} style={{
-        position: 'fixed',
-        top: 0,
-        left: isSidebarOpen ? sidebarWidth : 0,
-        transition: 'left 0.5s ease'
-      }}>
+      <button onClick={toggleSidebar}
+        className='ml-2 hover:bg-indigo-200 rounded'
+        style={{
+          position: 'fixed',
+          top: 5,
+          left: isSidebarOpen ? `${sidebarWidth - 65}px` : '0px',
+          transition: 'left 0.5s ease'
+        }}>
         {
           isSidebarOpen
-            ? <RiMenuFoldFill style={{ fontSize: '30px', margin: '5px'}}/>
-            : <RiMenuUnfoldFill style={{ fontSize: '30px', margin: '5px' }}/>
+            ? <RiMenuFoldFill className="text-2xl sm:text-4xl m-1"/>
+            : <RiMenuUnfoldFill className="text-2xl sm:text-4xl m-1"/>
         }
       </button>
         <div
-          className="flex flex-col items-center justify-start" style={{
+          className={`flex flex-col items-center justify-start ${isSidebarOpen ? 'hidden sm:flex' : ''}`}
+          style={{
             marginLeft: isSidebarOpen ? sidebarWidth : 0,
             width: isSidebarOpen ? `calc(100% - ${sidebarWidth}px)` : '100%',
             transition: 'margin-left 0.5s ease'
           }}
         >
-          <div className="w-full p-10 sm:w-4/5 md:w-3/5 ">
+          <div className="w-5/6 p-1 sm:w-4/5 md:w-3/5">
             <Title
-              ref={textareaRef}
+              ref={titleRef}
               noteId={noteId}
               value={noteTitle}
               setNoteTitle={setNoteTitle}
               setNotes={setNotes}
               notes={notes}
               placeholder="NewTitle"
-              className="mt-36 w-full border-none bg-stone-50 text-2xl sm:text-3xl md:text-4xl font-bold focus:ring-0 p-2 rounded resize-none mb-4 text-gray-700"
-              style={{ overflow: 'hidden', paddingLeft: '1px'}}
+              className="mt-36 w-full pl-1 overflow-hidden border-none bg-stone-50 text-2xl sm:text-3xl md:text-4xl font-bold focus:ring-0 p-2 rounded resize-none mb-4 text-gray-700"
               isSynchronized={true}
               onKeyDown={handleKeyDown}
             />
@@ -230,7 +256,7 @@ const MyEditor: React.FC<MyEditorProps> = () => {
               editorState={editorState}
               setEditorState={setEditorState}
               InlineToolbar={InlineToolbar}
-              LinkButton={LinkButton}
+              // LinkButton={LinkButton}
               setSearchResults={setSearchResults}
               setIsModalOpen={setIsModalOpen}
               selectedText={selectedText}

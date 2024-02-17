@@ -49,7 +49,7 @@ const LoginPage = () => {
     <SharedLayout>
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
       {errorMessage && <p className="text-red-500 mb-5">{errorMessage}</p>}
-        <h2 className="text-5xl font-bold text-center mb-6">ログイン</h2>
+        <h2 className="text-3xl sm:text-5xl font-bold text-center mb-6">ログイン</h2>
             {googleClientId && <GoogleLoginButton clientId={googleClientId} />}
         <hr className="my-4" />
         <form onSubmit={handleLogin} className="space-y-4">
@@ -79,9 +79,9 @@ const LoginPage = () => {
             ログイン
           </button>
         </form>
-        <div className="mt-4 text-center">
+        {/* <div className="mt-4 text-center">
           <a href="/password-reset" className="text-blue-600 hover:underline">パスワードを忘れた場合</a>
-        </div>
+        </div> */}
         <div className="mt-2 text-center">
           <a href="/signup" className="text-blue-600 hover:underline">サインアップ</a>
         </div>

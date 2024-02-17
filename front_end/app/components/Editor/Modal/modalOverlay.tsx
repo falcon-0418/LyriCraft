@@ -18,7 +18,7 @@ const ModalOverlay: React.FC<{ isOpen: boolean; onClose: () => void; animate: bo
 
   if (!isOpen) return null;
 
-  const className = `fixed inset-0 transition-opacity duration-300 ${animate ? 'opacity-100' : 'opacity-0'}`;
+  const className = `fixed inset-0 z-5 transition-opacity duration-300 ${animate ? 'opacity-100' : 'opacity-0'}`;
   return <div className={className} onClick={onClose} />;
 };
 

@@ -2,12 +2,12 @@ import React from 'react';
 import { EditorState } from 'draft-js';
 import { Separator } from '@draft-js-plugins/inline-toolbar';
 import {
-  ItalicButton,
+  // ItalicButton,
   BoldButton,
-  UnderlineButton,
+  // UnderlineButton,
   HeadlineOneButton,
-  HeadlineTwoButton,
-  HeadlineThreeButton,
+  // HeadlineTwoButton,
+  // HeadlineThreeButton,
 } from '@draft-js-plugins/buttons';
 import '@draft-js-plugins/inline-toolbar/lib/plugin.css';
 import RhymeSearchButton from './rhymeSearchButton';
@@ -17,7 +17,7 @@ interface InlineToolbarComponentProps {
   editorState: EditorState;
   setEditorState: (editorState: EditorState) => void;
   InlineToolbar: any;
-  LinkButton: any;
+  // LinkButton: any;
   setSearchResults: React.Dispatch<React.SetStateAction<any[]>>;
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   selectedText: string;
@@ -25,7 +25,7 @@ interface InlineToolbarComponentProps {
 
 const InlineToolbarComponent: React.FC<InlineToolbarComponentProps> = ({
   InlineToolbar,
-  LinkButton,
+  // LinkButton,
   setSearchResults,
   setIsModalOpen,
   selectedText
@@ -35,14 +35,14 @@ const InlineToolbarComponent: React.FC<InlineToolbarComponentProps> = ({
     <InlineToolbar>
       {(externalProps: any) => (
         <>
-          <ItalicButton {...externalProps} />
+          {/* <ItalicButton {...externalProps} /> */}
           <BoldButton {...externalProps} />
-          <UnderlineButton {...externalProps} />
+          {/* <UnderlineButton {...externalProps} /> */}
           <Separator {...externalProps} />
           <HeadlineOneButton {...externalProps} />
-          <HeadlineTwoButton {...externalProps} />
-          <HeadlineThreeButton {...externalProps} />
-          <LinkButton {...externalProps} />
+          {/* <HeadlineTwoButton {...externalProps} /> */}
+          {/* <HeadlineThreeButton {...externalProps} /> */}
+         {/* <LinkButton {...externalProps} /> */}
           <Separator {...externalProps} />
           <RhymeSearchButton
             selectedText={selectedText}
