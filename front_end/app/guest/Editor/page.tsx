@@ -103,7 +103,7 @@ const MyEditor: React.FC<MyEditorProps> = () => {
         <div className="w-5/6 p-1 sm:w-4/5 md:w-3/5">
           <Title
             ref={titleRef}
-            className="mt-36 text-4xl border-none font-bold focus:ring-0 rounded resize-none mb-4 w-full pl-1 overflow-hidden text-gray"
+            className="mt-36 text-4xl text-gray-700 border-none font-bold focus:ring-0 rounded resize-none mb-4 w-full pl-1 overflow-hidden text-gray"
             placeholder="NewTitle"
             value={noteTitle}
             onChange={handleTitleChange}
@@ -122,7 +122,7 @@ const MyEditor: React.FC<MyEditorProps> = () => {
           {showEditor && (
             <div
              ref={editorRef}
-             className="public-DraftEditor-content mb-48 w-full z-1"
+             className="public-DraftEditor-content text-gray-700 mb-48 w-full z-1"
             >
               <Editor
                 ref={editorRef}

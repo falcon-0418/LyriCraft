@@ -1,5 +1,5 @@
 interface WritingButtonProps {
-  onToggle: () => void; 
+  onToggle: () => void;
 }
 const WritingButton: React.FC<WritingButtonProps> = ({ onToggle }) => {
   return (
@@ -14,7 +14,7 @@ const WritingButton: React.FC<WritingButtonProps> = ({ onToggle }) => {
         cursor: 'pointer',
       }}
     >
-      早速書いてみる
+     早速Lyricを書く
     </button>
   );
 };

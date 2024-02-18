@@ -8,7 +8,6 @@ const useAutoScrollModal = (modalRef: RefObject<HTMLElement>, isOpen: boolean): 
   useEffect(() => {
     if (isOpen && modalRef.current) {
       const modalRect = modalRef.current.getBoundingClientRect();
-      console.log('モーダルの高さ:', modalRect.height);
       setModalHeight(modalRect.height);
 
       const viewportHeight = window.innerHeight;

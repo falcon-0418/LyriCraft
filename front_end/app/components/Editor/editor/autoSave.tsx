@@ -21,7 +21,6 @@ const AutoSaveComponent = ({ editorState, noteId, noteTitle }: AutoSaveComponent
           title: noteTitle,
           body: rawContent,
         });
-        console.log('Note saved successfully:', response.data);
       } catch (error) {
         console.error('Error saving note:', error);
       }
