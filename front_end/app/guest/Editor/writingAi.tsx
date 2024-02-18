@@ -7,7 +7,7 @@ const WritingAiButton = () => {
   const handleNavigate = () => {
     const token = sessionStorage.getItem('accessToken');
     if (token) {
-      router.push('/editor');
+      router.push('components/Editor/editor');
     } else {
       router.push('/login');
     }
@@ -25,7 +25,7 @@ const WritingAiButton = () => {
         cursor: 'pointer'
       }}
     >
-      ログインしてAIに書いてもらう
+      MyNoteにLyricを書く
     </button>
   );
 };

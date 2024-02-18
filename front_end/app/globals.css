@@ -5,10 +5,11 @@
 @layer components {
     .public-DraftEditor-content {
       @apply min-h-[100vh];
-
     }
   }
 
-  .bpsgbes {
-    @apply bg-white  border  shadow-lg;
-  }
+    .bpsgbes {
+      padding-left: 15px;
+      margin-right: -10px;
+      margin-top: 5px;
+    }

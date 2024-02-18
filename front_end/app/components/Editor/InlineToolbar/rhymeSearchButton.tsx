@@ -1,5 +1,5 @@
 import React from 'react';
-import axiosInstance from './axiosConfig';
+import axiosInstance from '../editor/axiosConfig';
 
 interface RhymeResult {
   word: string;
@@ -16,16 +16,13 @@ interface RhymeResult {
     setSearchResults,
     setIsModalOpen
   }) => {
-    console.log("RhymeSearchButton: selectedText received:", selectedText);
   const handleRhymeSearch = async () => {
-    console.log("RhymeSearchButton clicked with text:", selectedText);
     if (!selectedText) {
         return;
       }
 
     try {
       const response = await axiosInstance.get(`/rhyme_search?word=${(selectedText)}`);
-      console.log("API Response:", response.data);
       setSearchResults(response.data);
       setIsModalOpen(true);
     } catch (error) {
@@ -39,7 +36,7 @@ interface RhymeResult {
     <button
     onMouseDown={onMouseDown}
     onClick={handleRhymeSearch}
-    className="your-button-styles font-bold text-gray-500 pointer-events-auto hover:bg-gray-300"
+    className="your-button-styles font-light p-2 text-fuchsia-500 pointer-events-auto hover:bg-neutral-100"
     >
       韻検索
     </button>

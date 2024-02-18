@@ -1,5 +1,5 @@
 import React from 'react';
-import axiosInstance from './axiosConfig';
+import axiosInstance from '../editor/axiosConfig';
 import { ContentState, convertToRaw } from 'draft-js';
 import { NoteData } from '@/types/types';
 

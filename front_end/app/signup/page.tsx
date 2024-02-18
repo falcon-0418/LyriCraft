@@ -55,7 +55,7 @@ const SignUpPage = () => {
 
       alert('登録しました。');
       // 登録後に別のページに遷移
-      router.push('/editor');
+      router.push('components/Editor/editor');
     } catch (error) {
       console.error('アカウント作成エラー:', error);
     }
@@ -64,7 +64,7 @@ const SignUpPage = () => {
   return (
     <SharedLayout>
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-        <h2 className="text-5xl font-bold text-center mb-6">アカウント作成</h2>
+        <h2 className="text-3xl sm:text-5xl font-bold text-center mb-6">アカウント作成</h2>
           {googleClientId && <GoogleLoginButton clientId={googleClientId} />}
         <hr className="my-4" />
         <form onSubmit={handleSignUp} className="space-y-4">

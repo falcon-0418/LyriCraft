@@ -31,3 +31,4 @@
 /config/master.key
 
 back_end/mecab-ipadic-neologd
+front_end/public/defaultContent.txt

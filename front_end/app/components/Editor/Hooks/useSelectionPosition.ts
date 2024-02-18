@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-const useSelectionPosition = () => {
+const useSelectionPosition = (isModalOpen: boolean) => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
@@ -14,18 +14,20 @@ const useSelectionPosition = () => {
         if (parentElement && !parentElement.closest('.modal-content')) {
           setPosition({
             x: rect.left,
-            y: rect.bottom
+            y: rect.bottom + window.scrollY
           });
         }
       }
     };
 
     document.addEventListener('mouseup', updatePosition);
+    document.addEventListener('keyup', updatePosition);
 
     return () => {
       document.removeEventListener('mouseup', updatePosition);
+      document.removeEventListener('keyup', updatePosition);
     };
-  }, []);
+  }, [isModalOpen]);
 
   return position;
 };

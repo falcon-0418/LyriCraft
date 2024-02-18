@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import UserProfile from './userProfile';
 import CreateNoteButton from './createNoteButton';
-import axiosInstance from './axiosConfig';
+import axiosInstance from '../editor/axiosConfig';
 import { NoteData } from '@/types/types';
 import { FaRegTrashAlt } from "react-icons/fa";
-
-
 
 interface SidebarProps {
   notes: NoteData[];
@@ -19,10 +17,22 @@ interface SidebarProps {
   style?: React.CSSProperties;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ notes, noteId, onNoteCreated, onSelectNote, onDeleteNote, sidebarWidth, setSidebarWidth, isSidebarOpen }) => {
+const Sidebar: React.FC<SidebarProps> = ({
+  notes,
+  noteId,
+  onNoteCreated,
+  onSelectNote,
+  onDeleteNote,
+  sidebarWidth,
+  setSidebarWidth,
+  isSidebarOpen
+}) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const sidebarRef = useRef<HTMLDivElement>(null);
+
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -43,37 +53,60 @@ const Sidebar: React.FC<SidebarProps> = ({ notes, noteId, onNoteCreated, onSelec
     setIsModalOpen(!isModalOpen);
   };
 
-  const handleDrag = (e: MouseEvent) => {
-    const newWidth = Math.min(Math.max(e.clientX, 250), 400);
-    setSidebarWidth(newWidth);
-    localStorage.setItem('sidebarWidth', newWidth.toString());
-  };
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
 
-  const handleMouseUp = () => {
-    window.removeEventListener('mousemove', handleDrag as any);
-    window.removeEventListener('mouseup', handleMouseUp);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (windowWidth < 640 && isSidebarOpen) {
+      setSidebarWidth(window.innerWidth);
+    } else {
+      setSidebarWidth(Math.min(Math.max(sidebarWidth, 250), 400));
+    }
+  }, [windowWidth, isSidebarOpen, setSidebarWidth, sidebarWidth]);
+
+  const handleDrag = (e: MouseEvent) => {
+    if (windowWidth >= 640) { 
+      const newWidth = Math.min(Math.max(e.clientX, 250), 400);
+      setSidebarWidth(newWidth);
+      localStorage.setItem('sidebarWidth', newWidth.toString());
+    }
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
-    window.addEventListener('mousemove', handleDrag as any);
-    window.addEventListener('mouseup', handleMouseUp);
+    if (windowWidth >= 640) {
+      window.addEventListener('mousemove', handleDrag as any);
+      window.addEventListener('mouseup', () => {
+        window.removeEventListener('mousemove', handleDrag as any);
+      });
+    }
   };
 
   return (
-    <div className="sidebar-container" style={{
-      width: isSidebarOpen ? `${sidebarWidth}px` : "0",
-      position: 'relative',
-      transition: 'width 0.3s ease'
-    }}>
+    <div
+      ref={sidebarRef}
+      className="sidebar-container bg-stone-50"
+      style={{
+        width: isSidebarOpen ? `${sidebarWidth}px` : "0",
+        position: 'relative',
+        transition: 'width 0.5s ease',
+        overflow: 'hidden'
+      }}
+    >
       <div className="sidebar-content" style={{
         opacity: isSidebarOpen ? 1 : 0,
-        transform: isSidebarOpen ? 'translateX(0)' : `translateX(-100%)`,
-        transition: 'opacity 0.3s ease, transform 0.3s ease',
+        transform: isSidebarOpen ? 'translateX(0%)' : `translateX(-100%)`,
+        transition: 'opacity 0.5s ease, transform 0.5s ease',
         pointerEvents: isSidebarOpen ? 'auto' : 'none'
       }}>
         <div className="mb-4 p-1">
-          <h3 className="py-2 px-6 text-lg text-gray-500 bg-white hover:bg-gray-100 border-r font-semibold cursor-pointer"
+          <h3 className="py-2 px-2 text-lg text-gray-500 bg-white hover:bg-indigo-50 border-r font-semibold cursor-pointer"
               onClick={toggleModal}>{userName}
           </h3>
         </div>
@@ -86,15 +119,15 @@ const Sidebar: React.FC<SidebarProps> = ({ notes, noteId, onNoteCreated, onSelec
               {notes.map(note => (
                 <li
                   key={note.id}
-                  className={ `text-gray-500 mb-1 p-2 bg-white flex justify-between items-center
-                    ${note.id === noteId ? 'bg-indigo-100 border-l-4 border-indigo-500' : 'hover:bg-indigo-50'}`}
+                  className={ `text-gray-500 mb-1 p-2 flex justify-between items-center
+                    ${note.id === noteId ? 'bg-indigo-100 border-l-4 border-fuchsia-500' : 'hover:bg-indigo-50'}`}
                   onClick={() => onSelectNote(note.id)}
                 >
                   <span className="text-[14px] truncate cursor-pointer">
                     {note.title || "New Title"}
                   </span>
                   <button
-                    className="text-gray-500 text-xs hover:bg-gray-300 p-2"
+                    className="text-gray-500 text-xs hover:bg-indigo-200 rounded p-2"
                     onClick={(e) => {
                       e.stopPropagation();
                       if (window.confirm('本当に削除しますか？')) {

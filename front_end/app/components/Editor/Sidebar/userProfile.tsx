@@ -1,5 +1,4 @@
-import axiosInstance from './axiosConfig';
-import { useEffect } from 'react';
+import axiosInstance from '../editor/axiosConfig';
 import { useRouter } from 'next/navigation';
 
 interface UserProfileProps {

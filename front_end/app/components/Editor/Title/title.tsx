@@ -1,5 +1,5 @@
 import React, { useRef, useImperativeHandle, forwardRef, useEffect } from 'react';
-import axiosInstance from './axiosConfig';
+import axiosInstance from '../editor/axiosConfig';
 import { NoteData } from '@/types/types';
 
 interface TitleProps {
@@ -17,19 +17,29 @@ interface TitleProps {
   isSynchronized?: boolean;
 }
 
-export const Title = forwardRef<HTMLTextAreaElement, TitleProps>(
+export interface TitleRef {
+  adjustHeight: () => void;
+}
+
+export const Title = forwardRef<TitleRef, TitleProps>(
   ({ noteId, value, setNoteTitle, setNotes, notes, placeholder, className, style, rows, isSynchronized, onKeyDown, onChange }, ref) => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
-    useImperativeHandle(ref, () => textareaRef.current as HTMLTextAreaElement);
 
     const adjustTextareaHeight = () => {
       const target = textareaRef.current;
       if (target) {
         target.style.height = 'auto';
-        const newHeight = Math.min(target.scrollHeight, window.innerHeight);
-        target.style.height = `${newHeight}px`;
+        const computed = window.getComputedStyle(target);
+        const borderHeight = parseInt(computed.borderTopWidth, 10) + parseInt(computed.borderBottomWidth, 10);
+        const height = target.scrollHeight + borderHeight;
+        target.style.height = `${height}px`;
       }
     };
+
+    useImperativeHandle(ref, () => ({
+      adjustHeight: adjustTextareaHeight,
+    }));
+
 
     useEffect(() => {
       adjustTextareaHeight();
@@ -49,6 +59,7 @@ export const Title = forwardRef<HTMLTextAreaElement, TitleProps>(
           updateNoteTitle(newTitle, noteId);
         }
       }
+      adjustTextareaHeight();
     };
 
     const updateNoteTitle = async (title: string, noteId: number) => {
