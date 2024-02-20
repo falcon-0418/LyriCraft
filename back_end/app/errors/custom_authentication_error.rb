@@ -1,2 +1,0 @@
-class CustomAuthenticationError < StandardError
-end
