@@ -18,16 +18,16 @@ import createInlineToolbarPlugin from '@draft-js-plugins/inline-toolbar';
 import blockStyleFn from "../InlineToolbar/blockStyleClasses";
 
 import axiosInstance from './axiosConfig';
-import AutoSaveComponent from './/autoSave';
+import AutoSaveComponent from './autoSave';
 import Sidebar from "../Sidebar/sidebar";
 import { Title, TitleRef } from '../Title/title';
 import { NoteData } from '@/types/types';
 import NoteActions,{ handleNoteCreated, handleSelectNote, handleDeleteNote } from '../Sidebar/noteAction';
 
 import { titleKeyActions } from '../Title/titleKeyAction';
-import { editorKeyActions } from './/editorKeyAction';
+import { editorKeyActions } from './editorKeyAction';
 import SearchResultModal from '../Modal/searchResultModal';
-import { replaceOrAppendText } from './/textUtils';
+import { replaceOrAppendText } from './textUtils';
 
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 // import { decorator } from '../../Decorator/linkDecorator';
