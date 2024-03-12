@@ -1,3 +1,6 @@
 [submodule "LyriCraftAPI"]
 	path = LyriCraftAPI
 	url = git@github.com:falcon-0418/LyriCraftAPI.git
+[submodule "LyriCraftClient"]
+	path = LyriCraftClient
+	url = git@github.com:falcon-0418/LyriCraftClient.git
