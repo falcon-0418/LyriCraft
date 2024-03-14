@@ -30,5 +30,4 @@
 # Ignore master key for decrypting credentials and more.
 /config/master.key
 
-back_end/mecab-ipadic-neologd
-front_end/public/defaultContent.txt
+LyriCraftClient/public/defaultContent.txt
