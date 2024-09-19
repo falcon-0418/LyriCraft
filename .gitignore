@@ -31,3 +31,4 @@
 /config/master.key
 
 LyriCraftClient/public/defaultContent.txt
+LyriCraftAPI/.env*

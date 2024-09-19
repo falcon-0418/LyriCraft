@@ -1,0 +1,42 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:15.6  # PostgreSQLのイメージに変更
+    environment:
+      POSTGRES_PASSWORD: password
+    volumes:
+      - pgdata:/var/lib/postgresql/data  # PostgreSQLのデータディレクトリに変更
+    ports:
+      - '5432:5432'  # PostgreSQLのデフォルトポートに変更
+
+  api:
+    environment:
+      - MECAB_DICDIR=/usr/lib/x86_64-linux-gnu/mecab/dic/mecab-ipadic-neologd
+    env_file:
+      - ./LyriCraftAPI/.env
+    build:
+      context: ./LyriCraftAPI  # LyriCraftAPIフォルダがビルドコンテキスト
+    command: bash -c "rm -f tmp/pids/server.pid && bundle check || bundle install && bundle exec rails s -p 3000 -b '0.0.0.0'"
+    volumes:
+      - ./LyriCraftAPI:/api  # LyriCraftAPIフォルダをコンテナの/apiディレクトリにマウント
+    ports:
+      - '3030:3000'  # ホストのポート3003をコンテナのポート3000にマッピング
+    stdin_open: true
+    tty: true
+    depends_on:
+      - db
+
+  front:
+    build: ./LyriCraftClient/
+    volumes:
+      - ./LyriCraftClient:/front
+    ports:
+      - 8000:3000
+    tty: true
+    stdin_open: true
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    command: "npm run dev"
+
+volumes:
+  pgdata:
